@@ -13,9 +13,7 @@ const SearchPage: React.FC = () => {
         <FieldFilter />
 
         {/* Results Area */}
-        <div className="flex-1 space-y-8">
-          <FieldSearch count={MOCK_FIELDS.length} />
-
+        <div className="flex-1">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {MOCK_FIELDS.map((field) => (
               <FieldCard key={field.id} field={field} />

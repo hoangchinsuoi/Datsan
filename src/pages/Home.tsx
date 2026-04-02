@@ -3,69 +3,52 @@ import { motion } from 'motion/react';
 import { MapPin, Calendar, Trophy } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { MOCK_FIELDS } from '../services/api';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../utils/format';
 
 import { FieldCard } from '../components/fields/FieldCard';
+import { SearchHero } from '../components/fields/SearchHero';
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleCategoryClick = (type: string) => {
+    const searchType = type === 'Full Pitch' ? '11-a-side' : type.toLowerCase();
+    navigate(`/search?type=${searchType}`);
+  };
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative h-[80vh] min-h-[600px] flex items-center px-8 md:px-16 overflow-hidden">
+      <section className="relative h-[85vh] min-h-[700px] flex items-center justify-center px-8 md:px-16 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=1920" 
             alt="Stadium" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-105 animate-slow-zoom"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/40 to-transparent" />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60" />
         </div>
         
-        <div className="relative z-10 max-w-3xl">
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-6xl md:text-8xl font-black font-headline text-on-surface leading-[0.9] tracking-tighter mb-8 italic"
+        <div className="relative z-10 w-full max-w-5xl flex flex-col items-center text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-6 px-6 py-2 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30"
           >
-            CLAIM YOUR <br/><span className="text-primary">TERRITORY</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">The Ultimate Pitch Finder</span>
+          </motion.div>
+
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-7xl md:text-9xl font-black font-headline text-white leading-[0.85] tracking-tighter mb-12 italic drop-shadow-2xl"
+          >
+            CLAIM YOUR <br/><span className="text-primary drop-shadow-[0_0_30px_rgba(34,197,94,0.4)]">TERRITORY</span>
           </motion.h1>
           
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-surface-container-lowest p-4 md:p-6 rounded-[2rem] stadium-shadow flex flex-col md:flex-row gap-4 items-center"
-          >
-            <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col gap-1 px-4 border-r-0 md:border-r border-outline-variant/20">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Location</span>
-                <div className="flex items-center gap-2">
-                  <MapPin className="text-primary w-4 h-4" />
-                  <input type="text" placeholder="London, UK" className="bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold w-full" />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1 px-4 border-r-0 md:border-r border-outline-variant/20">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Date</span>
-                <div className="flex items-center gap-2">
-                  <Calendar className="text-primary w-4 h-4" />
-                  <input type="text" placeholder="Select Date" className="bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold w-full" />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1 px-4">
-                <span className="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Pitch Type</span>
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-sm">sports_soccer</span>
-                  <select className="bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold w-full appearance-none cursor-pointer">
-                    <option>5-a-side</option>
-                    <option>7-a-side</option>
-                    <option>11-a-side</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <Button className="w-full md:w-auto px-10 py-4 rounded-2xl">SEARCH</Button>
-          </motion.div>
+          <SearchHero />
         </div>
       </section>
 
@@ -85,6 +68,7 @@ const Home: React.FC = () => {
             <motion.div 
               key={cat.title}
               whileHover={{ y: -8 }}
+              onClick={() => handleCategoryClick(cat.title)}
               className="group bg-surface-container-low p-8 rounded-[2rem] transition-all cursor-pointer hover:bg-primary-container hover:text-white"
             >
               <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-6", cat.color)}>
