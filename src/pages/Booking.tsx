@@ -16,18 +16,28 @@ import {
   UserCheck
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
-import { MOCK_FIELDS } from '../services/api';
 import { motion, AnimatePresence } from 'motion/react';
 
 import { BookingCalendar } from '../components/booking/BookingCalendar';
+import type { Field } from '../types';
+import { fieldService } from '../services/fieldService';
+import { bookingService } from '../services/bookingService';
+import { calendarCellToIsoDate, slotLabelToStartEnd, getCalendarDates } from '../utils/bookingTime';
+import { AvailableSlot } from '../utils/apiMappers';
+import { useAuth } from '../hooks/useAuth';
+import { formatVnd } from '../utils/format';
 
 const BookingPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const field = MOCK_FIELDS.find(f => f.id === id) || MOCK_FIELDS[0];
-  
+  const { isAuthenticated } = useAuth();
+  const [field, setField] = React.useState<Field | null>(null);
+  const [fieldError, setFieldError] = React.useState<string | null>(null);
+  const [bookingError, setBookingError] = React.useState<string | null>(null);
   const [selectedDate, setSelectedDate] = React.useState<number>(5);
-  const [selectedSlot, setSelectedSlot] = React.useState<string | null>(null);
+  const [availableSlots, setAvailableSlots] = React.useState<AvailableSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = React.useState(false);
+  const [selectedSlot, setSelectedSlot] = React.useState<AvailableSlot | null>(null);
   const [isBooked, setIsBooked] = React.useState(false);
   const [paymentMethod, setPaymentMethod] = React.useState<'card' | 'credits'>('card');
   const [addons, setAddons] = React.useState<{id: string, name: string, price: number}[]>([]);
@@ -39,6 +49,55 @@ const BookingPage: React.FC = () => {
   const [teammates, setTeammates] = React.useState<string[]>([]);
   const [newTeammate, setNewTeammate] = React.useState('');
   const [agreedToTerms, setAgreedToTerms] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!id) return;
+    let c = false;
+    (async () => {
+      try {
+        const f = await fieldService.getFieldById(id);
+        if (c) return;
+        setField(f ?? null);
+        if (!f) setFieldError('Không tìm thấy sân.');
+      } catch (e) {
+        if (!c) setFieldError(e instanceof Error ? e.message : 'Lỗi tải sân.');
+      }
+    })();
+    return () => { c = true; };
+  }, [id]);
+
+  React.useEffect(() => {
+    if (!field || !id) return;
+    const date = calendarCellToIsoDate(selectedDate);
+    let c = false;
+    (async () => {
+      setLoadingSlots(true);
+      try {
+        const slots = await bookingService.getAvailableSlots(id, date);
+        if (!c) {
+          setAvailableSlots(slots);
+          setSelectedSlot(null);
+        }
+      } catch (err) {
+        console.error("Failed to load slots:", err);
+      } finally {
+        if (!c) setLoadingSlots(false);
+      }
+    })();
+    return () => { c = true; };
+  }, [field, id, selectedDate]);
+
+  if (!field && !fieldError) {
+    return <div className="max-w-7xl mx-auto px-8 py-24 text-center font-bold text-on-surface-variant">Đang tải…</div>;
+  }
+  if (fieldError || !field) {
+    return (
+      <div className="max-w-7xl mx-auto px-8 py-24 text-center">
+        <p className="text-red-600 font-bold mb-4">{fieldError ?? 'Không tìm thấy sân.'}</p>
+        <Button onClick={() => navigate('/search')}>Về danh sách sân</Button>
+      </div>
+    );
+  }
 
   const toggleAddon = (addon: {id: string, name: string, price: number}) => {
     setAddons(prev => 
@@ -55,14 +114,31 @@ const BookingPage: React.FC = () => {
     }
   };
 
-  const subtotal = field.price + (addons.reduce((acc, curr) => acc + curr.price, 0));
-  const lightingFee = 15;
-  const serviceFee = 2.50;
+  const subtotal = field.price + addons.reduce((acc, curr) => acc + curr.price, 0);
+  const lightingFee = 0;
+  const serviceFee = 0;
   const total = subtotal + lightingFee + serviceFee;
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!selectedSlot || !agreedToTerms) return;
-    setIsBooked(true);
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    setBookingError(null);
+    try {
+      const bookingDate = calendarCellToIsoDate(selectedDate);
+      await bookingService.createBooking({
+        fieldId: Number(field.id),
+        bookingDate,
+        startTime: selectedSlot.startTime,
+        endTime: selectedSlot.endTime,
+        note: matchInfo.teamName ? `Đội: ${matchInfo.teamName}` : undefined,
+      });
+      setIsBooked(true);
+    } catch (e) {
+      setBookingError(e instanceof Error ? e.message : "Đặt sân thất bại.");
+    }
   };
 
   if (isBooked) {
@@ -100,11 +176,13 @@ const BookingPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-8">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-1">Match Date</p>
-                  <p className="font-bold">Thursday, June {selectedDate}th</p>
+                  <p className="font-bold">
+                    {getCalendarDates().find(d => d.cellId === selectedDate)?.dayName}, {getCalendarDates().find(d => d.cellId === selectedDate)?.monthName} {getCalendarDates().find(d => d.cellId === selectedDate)?.label}th
+                  </p>
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-1">Time Slot</p>
-                  <p className="font-bold">{selectedSlot}</p>
+                  <p className="font-bold">{selectedSlot?.time}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-1">Pitch</p>
@@ -123,7 +201,7 @@ const BookingPage: React.FC = () => {
                   </div>
                   <p className="text-xs font-bold text-on-surface-variant">Payment Verified</p>
                 </div>
-                <p className="text-2xl font-black font-headline text-on-surface">£{total.toFixed(2)}</p>
+                <p className="text-2xl font-black font-headline text-on-surface">{formatVnd(total)} ₫</p>
               </div>
             </div>
 
@@ -172,28 +250,24 @@ const BookingPage: React.FC = () => {
               <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center text-sm">2</div>
               Available Time Slots
             </h2>
+            {loadingSlots ? (
+               <div className="text-center py-12 text-on-surface-variant font-bold">Checking availability...</div>
+            ) : availableSlots.length === 0 ? (
+               <div className="text-center py-12 text-on-surface-variant italic">No sessions available for this date.</div>
+            ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { time: '08:00 AM', status: 'Reserved' },
-                { time: '09:30 AM', price: `£${field.price}` },
-                { time: '11:00 AM', price: `£${field.price}` },
-                { time: '12:30 PM', price: `£${field.price}` },
-                { time: '02:00 PM', status: 'Reserved' },
-                { time: '03:30 PM', price: `£${field.price + 15}` },
-                { time: '05:00 PM', price: `£${field.price + 25}` },
-                { time: '06:30 PM', price: `£${field.price + 25}` }
-              ].map((slot, i) => {
-                const isSelected = selectedSlot === slot.time;
+              {availableSlots.map((slot, i) => {
+                const isSelected = selectedSlot === slot;
                 return (
                   <button 
                     key={i}
-                    disabled={slot.status === 'Reserved'}
-                    onClick={() => setSelectedSlot(slot.time)}
+                    disabled={!!slot.status}
+                    onClick={() => setSelectedSlot(slot)}
                     className={cn(
                       "p-6 rounded-[1.5rem] flex flex-col items-center gap-1 transition-all border-2",
                       isSelected 
                         ? "bg-secondary border-secondary text-white shadow-xl shadow-secondary/30 scale-105" : 
-                      slot.status === 'Reserved' 
+                      slot.status 
                         ? "bg-surface-container-low border-transparent opacity-40 cursor-not-allowed" :
                         "bg-surface-container-low border-transparent hover:border-secondary/30 hover:bg-secondary/5"
                     )}
@@ -206,6 +280,7 @@ const BookingPage: React.FC = () => {
                 );
               })}
             </div>
+            )}
           </section>
 
           {/* Step 3: Match Details */}
@@ -300,7 +375,7 @@ const BookingPage: React.FC = () => {
                     <div>
                       <p className="font-black text-lg">{addon.name}</p>
                       <p className="text-xs text-on-surface-variant mb-2">{addon.desc}</p>
-                      <p className="text-primary font-black">£{addon.price}.00</p>
+                      <p className="text-primary font-black">{formatVnd(addon.price)} ₫</p>
                     </div>
                   </button>
                 );
@@ -335,7 +410,9 @@ const BookingPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-surface/50 mb-1">Match Day</p>
-                    <p className="font-bold text-sm">Thursday, June {selectedDate}th, 2024</p>
+                    <p className="font-bold text-sm">
+                      {getCalendarDates().find(d => d.cellId === selectedDate)?.dayName}, {getCalendarDates().find(d => d.cellId === selectedDate)?.monthName} {getCalendarDates().find(d => d.cellId === selectedDate)?.label}th, {getCalendarDates().find(d => d.cellId === selectedDate)?.year}
+                    </p>
                   </div>
                 </div>
 
@@ -345,7 +422,7 @@ const BookingPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-surface/50 mb-1">Time Slot</p>
-                    <p className="font-bold text-sm">{selectedSlot || 'Not selected'}</p>
+                    <p className="font-bold text-sm">{selectedSlot?.time || 'Not selected'}</p>
                     <p className="text-xs opacity-60">90 Minutes Session</p>
                   </div>
                 </div>
@@ -354,27 +431,27 @@ const BookingPage: React.FC = () => {
               <div className="pt-8 border-t border-white/10 space-y-4 relative z-10">
                 <div className="flex justify-between text-sm opacity-70">
                   <span>Base Pitch Rental</span>
-                  <span>£{field.price}.00</span>
+                  <span>{formatVnd(field.price)} ₫</span>
                 </div>
                 {addons.map(addon => (
                   <div key={addon.id} className="flex justify-between text-sm opacity-70">
                     <span>{addon.name}</span>
-                    <span>£{addon.price}.00</span>
+                    <span>{formatVnd(addon.price)} ₫</span>
                   </div>
                 ))}
                 <div className="flex justify-between text-sm opacity-70">
                   <span>Night Lighting Fee</span>
-                  <span>£{lightingFee}.00</span>
+                  <span>{formatVnd(lightingFee)} ₫</span>
                 </div>
                 <div className="flex justify-between text-sm opacity-70">
                   <span>Service Fee</span>
-                  <span>£{serviceFee.toFixed(2)}</span>
+                  <span>{formatVnd(serviceFee)} ₫</span>
                 </div>
                 
                 <div className="flex justify-between items-end pt-4">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Total Amount</p>
-                    <span className="text-4xl font-black font-headline">£{total.toFixed(2)}</span>
+                    <span className="text-4xl font-black font-headline">{formatVnd(total)} ₫</span>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] font-black uppercase tracking-widest text-surface/40">Inc. VAT</p>
@@ -382,7 +459,10 @@ const BookingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-10 space-y-6">
+                <div className="mt-10 space-y-6">
+                {bookingError && (
+                  <p className="text-xs font-bold text-red-200 px-2">{bookingError}</p>
+                )}
                 <div className="flex items-center gap-3 px-2">
                   <input 
                     type="checkbox" 

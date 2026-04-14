@@ -12,6 +12,7 @@ public class FieldDto
     public string Status { get; set; } = "Available";
     public int MaxPlayers { get; set; }
     public double AverageRating { get; set; }
+    public int ReviewsCount { get; set; }
 }
 
 public class FieldCreateDto

@@ -1,17 +1,23 @@
-import { MOCK_USER } from './api';
+﻿import { apiPost } from "./api";
+import type { AuthUser } from "../types";
+
+export type RegisterRequest = {
+  fullName: string;
+  username: string;
+  email: string;
+  password: string;
+  phone?: string;
+};
 
 export const authService = {
-  login: async (email: string, password: string) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return MOCK_USER;
+  async login(credentials: { email: string; password: string }): Promise<AuthUser> {
+    return apiPost<AuthUser>("/auth/login", {
+      usernameOrEmail: credentials.email,
+      password: credentials.password,
+    });
   },
-  register: async (userData: any) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return { ...MOCK_USER, ...userData };
+
+  async register(body: RegisterRequest): Promise<AuthUser> {
+    return apiPost<AuthUser>("/auth/register", body);
   },
-  logout: () => {
-    // Clear local storage or session
-  }
 };

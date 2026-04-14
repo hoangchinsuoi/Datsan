@@ -2,15 +2,17 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Calendar, Trophy } from 'lucide-react';
 import { Button } from '../components/common/Button';
-import { MOCK_FIELDS } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '../utils/format';
 
 import { FieldCard } from '../components/fields/FieldCard';
 import { SearchHero } from '../components/fields/SearchHero';
+import { useFields } from '../hooks/useFields';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { fields, loading } = useFields();
+  const featured = fields.slice(0, 3);
 
   const handleCategoryClick = (type: string) => {
     const searchType = type === 'Full Pitch' ? '11-a-side' : type.toLowerCase();
@@ -92,17 +94,21 @@ const Home: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {MOCK_FIELDS.slice(0, 3).map((field, i) => (
-            <motion.div 
-              key={field.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className={cn(i === 1 && "lg:mt-12", i === 2 && "lg:mt-24")}
-            >
-              <FieldCard field={field} />
-            </motion.div>
-          ))}
+          {loading && (
+            <p className="text-on-surface-variant font-bold col-span-full">Đang tải sân từ máy chủ…</p>
+          )}
+          {!loading &&
+            featured.map((field, i) => (
+              <motion.div
+                key={field.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className={cn(i === 1 && "lg:mt-12", i === 2 && "lg:mt-24")}
+              >
+                <FieldCard field={field} />
+              </motion.div>
+            ))}
         </div>
       </section>
 

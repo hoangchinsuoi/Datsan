@@ -6,8 +6,9 @@ export interface Field {
   rating: number;
   reviewsCount: number;
   image: string;
-  type: 'Natural Grass' | 'Hybrid Turf' | 'Artificial Astro' | 'Indoor Futsal' | 'Urban Cage';
-  area: 'North' | 'South' | 'East' | 'West' | 'Central';
+  /** Hiển thị: thường lấy từ danh mục API */
+  type: string;
+  area: string;
   amenities: string[];
   size: string;
   lighting: string;
@@ -24,16 +25,25 @@ export interface Booking {
   time: string;
   location: string;
   amount: number;
-  status: 'Confirmed' | 'Pending' | 'Cancelled' | 'Completed';
+  status: "Confirmed" | "Pending" | "Cancelled" | "Completed";
   paymentMethod: string;
+}
+
+export interface AuthUser {
+  userId: number;
+  fullName: string;
+  username: string;
+  email: string;
+  role: string;
+  token: string;
 }
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  avatar: string;
-  position: string;
-  role: 'user' | 'admin';
+  phone?: string;
+  avatar?: string;
+  position?: string;
+  role: "user" | "admin";
 }

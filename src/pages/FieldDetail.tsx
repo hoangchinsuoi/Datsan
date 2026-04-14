@@ -1,16 +1,99 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Share2, Heart, ChevronRight, Grid, ShieldCheck, Users, Calendar, Clock } from 'lucide-react';
-import { MOCK_FIELDS } from '../services/api';
+import { Star, MapPin, Share2, Heart, ChevronRight, Grid, ShieldCheck, Calendar, Clock } from 'lucide-react';
 import { Button } from '../components/common/Button';
-import { cn } from '../utils/format';
+import { cn, formatVnd } from '../utils/format';
 
 import { BookingCalendar } from '../components/booking/BookingCalendar';
+import type { Field } from '../types';
+import { fieldService } from '../services/fieldService';
+import { reviewService, type ReviewDto } from '../services/reviewService';
+import { bookingService } from '../services/bookingService';
+import { AvailableSlot } from '../utils/apiMappers';
+import { calendarCellToIsoDate, getCalendarDates } from '../utils/bookingTime';
 
 const FieldDetail: React.FC = () => {
   const { id } = useParams();
-  const field = MOCK_FIELDS.find(f => f.id === id) || MOCK_FIELDS[0];
+  const [field, setField] = React.useState<Field | null>(null);
+  const [reviews, setReviews] = React.useState<ReviewDto[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [selectedDate, setSelectedDate] = React.useState<number>(5);
+  const [availableSlots, setAvailableSlots] = React.useState<AvailableSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = React.useState(false);
+  const [selectedSlot, setSelectedSlot] = React.useState<AvailableSlot | null>(null);
+
+  React.useEffect(() => {
+    if (!id) {
+      setLoading(false);
+      setLoadError('Thiếu mã sân.');
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const f = await fieldService.getFieldById(id);
+        if (cancelled) return;
+        if (!f) {
+          setField(null);
+          setLoadError('Không tìm thấy sân.');
+          return;
+        }
+        setField(f);
+        const rev = await reviewService.listByField(Number(id));
+        if (!cancelled) setReviews(rev);
+      } catch (e) {
+        if (!cancelled) setLoadError(e instanceof Error ? e.message : 'Không tải được dữ liệu.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  React.useEffect(() => {
+    if (!id) return;
+    const date = calendarCellToIsoDate(selectedDate);
+    let c = false;
+    (async () => {
+      setLoadingSlots(true);
+      try {
+        const slots = await bookingService.getAvailableSlots(id, date);
+        if (!c) {
+          setAvailableSlots(slots);
+          setSelectedSlot(null);
+        }
+      } catch (err) {
+        console.error("Failed to load slots:", err);
+      } finally {
+        if (!c) setLoadingSlots(false);
+      }
+    })();
+    return () => { c = true; };
+  }, [id, selectedDate]);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-8 py-24 text-center font-bold text-on-surface-variant">
+        Đang tải chi tiết sân…
+      </div>
+    );
+  }
+
+  if (loadError || !field) {
+    return (
+      <div className="max-w-7xl mx-auto px-8 py-24 text-center">
+        <p className="text-red-600 font-bold mb-4">{loadError ?? 'Không tìm thấy sân.'}</p>
+        <Link to="/search" className="text-primary font-bold underline">
+          Quay lại danh sách
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-8 py-12">
@@ -107,31 +190,61 @@ const FieldDetail: React.FC = () => {
           </section>
 
           <section>
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <span className="w-1.5 h-8 bg-primary rounded-full" /> Đánh giá ({reviews.length})
+            </h2>
+            {reviews.length === 0 ? (
+              <p className="text-on-surface-variant">Chưa có đánh giá cho sân này.</p>
+            ) : (
+              <ul className="space-y-4">
+                {reviews.map((r) => (
+                  <li key={r.id} className="p-6 bg-surface-container-low rounded-2xl border border-outline-variant/10">
+                    <div className="flex justify-between items-start gap-4 mb-2">
+                      <span className="font-black">{r.userFullName}</span>
+                      <span className="text-primary font-bold">{r.rating}★</span>
+                    </div>
+                    <p className="text-on-surface-variant text-sm">{r.comment}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section>
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold flex items-center gap-3">
                 <span className="w-1.5 h-8 bg-primary rounded-full" /> Availability
               </h2>
             </div>
-            <BookingCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+             <BookingCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
             <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-8">
-              {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'].map((time, i) => {
-                const isBooked = i % 4 === 0;
-                return (
-                  <button 
-                    key={time}
-                    disabled={isBooked}
-                    className={cn(
-                      "p-4 rounded-2xl text-sm font-bold transition-all border-2",
-                      isBooked 
-                        ? "bg-surface-container-highest text-on-surface-variant/40 border-transparent cursor-not-allowed" 
-                        : "bg-white border-outline-variant/10 hover:border-primary hover:text-primary text-on-surface stadium-shadow"
-                    )}
-                  >
-                    {time}
-                    {isBooked && <span className="block text-[10px] opacity-60">Booked</span>}
-                  </button>
-                );
-              })}
+              {loadingSlots ? (
+                <div className="col-span-full py-8 text-center text-on-surface-variant font-bold">Checking...</div>
+              ) : availableSlots.length === 0 ? (
+                <div className="col-span-full py-8 text-center text-on-surface-variant italic">No slots found.</div>
+              ) : (
+                availableSlots.map((slot) => {
+                  const isBooked = !!slot.status;
+                  return (
+                    <button 
+                      key={slot.time}
+                      disabled={isBooked}
+                      onClick={() => !isBooked && setSelectedSlot(slot)}
+                      className={cn(
+                        "p-4 rounded-2xl text-xs font-bold transition-all border-2",
+                        isBooked 
+                          ? "bg-surface-container-highest text-on-surface-variant/40 border-transparent cursor-not-allowed" 
+                          : selectedSlot === slot
+                            ? "bg-primary text-white border-primary shadow-lg scale-105"
+                            : "bg-white border-outline-variant/10 hover:border-primary hover:text-primary text-on-surface stadium-shadow"
+                      )}
+                    >
+                      {slot.time.split(' - ')[0]}
+                      {isBooked && <span className="block text-[8px] opacity-60">Booked</span>}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </section>
         </div>
@@ -141,8 +254,8 @@ const FieldDetail: React.FC = () => {
           <div className="sticky top-28 p-8 bg-surface-container-lowest rounded-[2rem] stadium-shadow border border-outline-variant/15">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <span className="text-3xl font-black text-on-surface">£{field.price}</span>
-                <span className="text-on-surface-variant font-medium">/ hour</span>
+                <span className="text-3xl font-black text-on-surface">{formatVnd(field.price)} ₫</span>
+                <span className="text-on-surface-variant font-medium">/ giờ</span>
               </div>
               <div className="flex items-center gap-1 text-sm bg-primary/10 px-3 py-1 rounded-full">
                 <Star className="w-4 h-4 text-primary fill-current" />
@@ -154,14 +267,16 @@ const FieldDetail: React.FC = () => {
               <div className="p-4 bg-surface-container-low rounded-2xl">
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Date</label>
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">Sat, Nov 23</span>
+                  <span className="font-semibold">
+                    {getCalendarDates().find(d => d.cellId === selectedDate)?.dayName}, {getCalendarDates().find(d => d.cellId === selectedDate)?.label} {getCalendarDates().find(d => d.cellId === selectedDate)?.monthName.slice(0, 3)}
+                  </span>
                   <Calendar className="w-4 h-4 text-primary" />
                 </div>
               </div>
               <div className="p-4 bg-surface-container-low rounded-2xl">
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Time Slot</label>
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">19:00 - 20:00</span>
+                  <span className="font-semibold">{selectedSlot?.time || 'Chọn khung giờ'}</span>
                   <Clock className="w-4 h-4 text-primary" />
                 </div>
               </div>

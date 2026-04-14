@@ -1,9 +1,8 @@
 ﻿using Datsan.Server.Application.Services;
 using Datsan.Server.Core.DTOs;
+using Datsan.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace Datsan.Server.Controllers;
 
@@ -13,10 +12,7 @@ public class FieldsController : ControllerBase
 {
     private readonly FieldService _fieldService;
 
-    public FieldsController(FieldService fieldService)
-    {
-        _fieldService = fieldService;
-    }
+    public FieldsController(FieldService fieldService) => _fieldService = fieldService;
 
     /// <summary>
     /// Lấy danh sách tất cả sân (có hỗ trợ filter, search)
@@ -27,26 +23,17 @@ public class FieldsController : ControllerBase
         [FromQuery] int? categoryId,
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
-        [FromQuery] string? status)
+        [FromQuery] string? status,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var fields = await _fieldService.GetAllAsync(search, categoryId, minPrice, maxPrice, status);
-
-            return Ok(new
-            {
-                success = true,
-                message = "Lấy danh sách sân thành công",
-                data = fields
-            });
+            var fields = await _fieldService.GetAllAsync(search, categoryId, minPrice, maxPrice, status, cancellationToken);
+            return Ok(ApiResponse.Success("Lấy danh sách sân thành công", fields));
         }
         catch (Exception ex)
         {
-            return BadRequest(new
-            {
-                success = false,
-                message = ex.Message
-            });
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
         }
     }
 
@@ -54,29 +41,20 @@ public class FieldsController : ControllerBase
     /// Lấy thông tin chi tiết một sân theo ID
     /// </summary>
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetFieldById(int id)
+    public async Task<IActionResult> GetFieldById(int id, CancellationToken cancellationToken)
     {
         try
         {
-            var field = await _fieldService.GetByIdAsync(id);
+            var field = await _fieldService.GetByIdAsync(id, cancellationToken);
 
-            if (field == null)
-                return NotFound(new { success = false, message = "Không tìm thấy sân" });
+            if (field is null)
+                return NotFound(ApiResponse.Fail("Không tìm thấy sân", null));
 
-            return Ok(new
-            {
-                success = true,
-                message = "Lấy thông tin sân thành công",
-                data = field
-            });
+            return Ok(ApiResponse.Success("Lấy thông tin sân thành công", field));
         }
         catch (Exception ex)
         {
-            return BadRequest(new
-            {
-                success = false,
-                message = ex.Message
-            });
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
         }
     }
 
@@ -84,26 +62,16 @@ public class FieldsController : ControllerBase
     /// Tìm kiếm sân (dùng cho chức năng search)
     /// </summary>
     [HttpGet("search")]
-    public async Task<IActionResult> SearchFields([FromQuery] string query)
+    public async Task<IActionResult> SearchFields([FromQuery] string query, CancellationToken cancellationToken)
     {
         try
         {
-            var results = await _fieldService.SearchAsync(query);
-
-            return Ok(new
-            {
-                success = true,
-                message = "Tìm kiếm sân thành công",
-                data = results
-            });
+            var results = await _fieldService.SearchAsync(query, cancellationToken);
+            return Ok(ApiResponse.Success("Tìm kiếm sân thành công", results));
         }
         catch (Exception ex)
         {
-            return BadRequest(new
-            {
-                success = false,
-                message = ex.Message
-            });
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
         }
     }
 
@@ -112,26 +80,16 @@ public class FieldsController : ControllerBase
     /// </summary>
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> CreateField([FromBody] FieldCreateDto dto)
+    public async Task<IActionResult> CreateField([FromBody] FieldCreateDto dto, CancellationToken cancellationToken)
     {
         try
         {
-            var field = await _fieldService.CreateAsync(dto);
-
-            return Ok(new
-            {
-                success = true,
-                message = "Tạo sân thành công",
-                data = field
-            });
+            var field = await _fieldService.CreateAsync(dto, cancellationToken);
+            return Ok(ApiResponse.Success("Tạo sân thành công", field));
         }
         catch (Exception ex)
         {
-            return BadRequest(new
-            {
-                success = false,
-                message = ex.Message
-            });
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
         }
     }
 }

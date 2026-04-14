@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Datsan.Server.Core.DTOs;
 
@@ -14,6 +14,7 @@ public class BookingCreateDto
 public class BookingDto
 {
     public int Id { get; set; }
+    public int FieldId { get; set; }
     public string FieldName { get; set; } = string.Empty;
     public DateOnly BookingDate { get; set; }
     public TimeOnly StartTime { get; set; }
@@ -22,4 +23,12 @@ public class BookingDto
     public string Status { get; set; } = "Pending";
     public string? Note { get; set; }
     public DateTime CreatedAt { get; set; }
+}
+
+public class AvailableSlotDto
+{
+    public TimeOnly StartTime { get; set; }
+    public TimeOnly EndTime { get; set; }
+    public bool IsAvailable { get; set; }
+    public decimal Price { get; set; }
 }

@@ -1,13 +1,17 @@
 import React from 'react';
 import { LayoutDashboard, Calendar, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/format';
 import { DashboardView } from '../components/profile/DashboardView';
 import { BookingsView } from '../components/profile/BookingsView';
 import { SettingsView } from '../components/profile/SettingsView';
+import { useAuth } from '../hooks/useAuth';
 
 type TabType = 'dashboard' | 'bookings' | 'settings';
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = React.useState<TabType>('settings');
 
   const renderContent = () => {
@@ -59,7 +63,14 @@ const Profile: React.FC = () => {
             <HelpCircle className="w-5 h-5 text-primary group-hover:rotate-12 transition-transform" />
             <span className="font-black text-xs uppercase tracking-widest">Support</span>
           </button>
-          <button className="flex items-center gap-4 px-5 py-4 text-red-500 hover:bg-red-50 rounded-2xl transition-all group">
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              navigate('/');
+            }}
+            className="flex items-center gap-4 px-5 py-4 text-red-500 hover:bg-red-50 rounded-2xl transition-all group"
+          >
             <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-black text-xs uppercase tracking-widest">Logout</span>
           </button>

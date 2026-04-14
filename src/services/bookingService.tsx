@@ -1,19 +1,32 @@
-import { MOCK_BOOKINGS } from './api';
+import { apiGet, apiPost, apiDeleteRaw } from "./api";
+import type { Booking } from "../types";
+import { mapBookingDto, type BookingDto, mapAvailableSlotDto, type AvailableSlotDto, type AvailableSlot } from "../utils/apiMappers";
+
+export type CreateBookingPayload = {
+  fieldId: number;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  note?: string;
+};
 
 export const bookingService = {
-  getBookings: async () => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return MOCK_BOOKINGS;
+  async getMyBookings(): Promise<Booking[]> {
+    const rows = await apiGet<BookingDto[]>("/bookings");
+    return rows.map((b) => mapBookingDto(b));
   },
-  createBooking: async (bookingData: any) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return { id: Math.random().toString(36).substr(2, 9), ...bookingData };
+
+  async createBooking(payload: CreateBookingPayload): Promise<Booking> {
+    const row = await apiPost<BookingDto>("/bookings", payload);
+    return mapBookingDto(row);
   },
-  cancelBooking: async (bookingId: string) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { success: true };
-  }
+
+  async cancelBooking(bookingId: string): Promise<void> {
+    await apiDeleteRaw(`/bookings/${encodeURIComponent(bookingId)}`);
+  },
+
+  async getAvailableSlots(fieldId: string, date: string): Promise<AvailableSlot[]> {
+    const rows = await apiGet<AvailableSlotDto[]>(`/bookings/available-slots?fieldId=${fieldId}&date=${date}`);
+    return rows.map((s) => mapAvailableSlotDto(s));
+  },
 };

@@ -3,6 +3,7 @@ import { Star, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../common/Button';
 import { Field } from '../../types';
+import { formatVnd } from '../../utils/format';
 
 interface FieldCardProps {
   field: Field;
@@ -40,7 +41,7 @@ export const FieldCard: React.FC<FieldCardProps> = ({ field }) => {
           </div>
           <div className="text-right">
             <div className="flex flex-col">
-              <span className="text-3xl font-black text-primary leading-none">£{field.price}</span>
+              <span className="text-3xl font-black text-primary leading-none">{formatVnd(field.price)} ₫</span>
               <span className="text-[10px] text-on-surface-variant uppercase font-black tracking-widest mt-1 opacity-60">per hour</span>
             </div>
           </div>

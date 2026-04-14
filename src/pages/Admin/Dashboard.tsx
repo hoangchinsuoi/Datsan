@@ -1,13 +1,17 @@
 import React from 'react';
 import { LayoutDashboard, Calendar, Map as Stadium, Users, Settings, PlusCircle, HelpCircle, LogOut, TrendingUp, DollarSign, UserCheck, BarChart3, Search, Filter, MoreHorizontal } from 'lucide-react';
-import { MOCK_USER } from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/common/Button';
 import { cn } from '../../utils/format';
 import { AdminSidebar } from '../../components/layout/AdminSidebar';
 import { NewFieldModal } from '../../components/NewFieldModal';
 
 const Dashboard: React.FC = () => {
+  const { user } = useAuth();
   const [isNewFieldOpen, setIsNewFieldOpen] = React.useState(false);
+  const avatar =
+    user?.avatar ??
+    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200';
 
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
@@ -26,7 +30,7 @@ const Dashboard: React.FC = () => {
               <Calendar className="text-primary w-4 h-4" />
               <span className="text-sm font-semibold">Oct 12 - Oct 19, 2024</span>
             </div>
-            <img src={MOCK_USER.avatar} alt="Admin" className="w-10 h-10 rounded-full border-2 border-white stadium-shadow" />
+            <img src={avatar} alt="Admin" className="w-10 h-10 rounded-full border-2 border-white stadium-shadow" />
           </div>
         </header>
 

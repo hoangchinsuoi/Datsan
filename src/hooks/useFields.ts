@@ -1,20 +1,29 @@
-import { useState, useEffect } from 'react';
-import { Field } from '../types';
-import { MOCK_FIELDS } from '../services/api';
+import { useCallback, useEffect, useState } from "react";
+import type { Field } from "../types";
+import { fieldService } from "../services/fieldService";
 
-export const useFields = () => {
+export function useFields() {
   const [fields, setFields] = useState<Field[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Simulate API call
-    const fetchFields = async () => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setFields(MOCK_FIELDS);
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fieldService.getFields();
+      setFields(data);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Không tải được danh sách sân.");
+      setFields([]);
+    } finally {
       setLoading(false);
-    };
-    fetchFields();
+    }
   }, []);
 
-  return { fields, loading };
-};
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
+
+  return { fields, loading, error, refetch };
+}

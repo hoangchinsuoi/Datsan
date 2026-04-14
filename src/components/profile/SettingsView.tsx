@@ -1,10 +1,15 @@
-import React from 'react';
-import { User, Lock, Edit2, ArrowRight, ShieldCheck } from 'lucide-react';
-import { MOCK_USER } from '../../services/api';
-import { Button } from '../common/Button';
-import { Input } from '../common/Input';
+import React from "react";
+import { User, Lock, Edit2, ArrowRight, ShieldCheck } from "lucide-react";
+import { Button } from "../common/Button";
+import { Input } from "../common/Input";
+import { useAuth } from "../../hooks/useAuth";
+
+const AVATAR_FALLBACK =
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200";
 
 export const SettingsView: React.FC = () => {
+  const { user } = useAuth();
+  const u = user ?? { name: "", email: "", phone: "", avatar: AVATAR_FALLBACK };
   return (
     <div className="space-y-12">
       <header className="mb-12">
@@ -37,7 +42,7 @@ export const SettingsView: React.FC = () => {
             <div className="lg:col-span-3 flex flex-col items-center gap-6">
               <div className="relative group">
                 <div className="w-40 h-40 rounded-[2.5rem] overflow-hidden border-8 border-surface-container-low stadium-shadow group-hover:scale-[1.02] transition-transform duration-500">
-                  <img src={MOCK_USER.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={u.avatar ?? AVATAR_FALLBACK} alt="Avatar" className="w-full h-full object-cover" />
                 </div>
                 <button className="absolute -bottom-2 -right-2 bg-primary text-white p-4 rounded-2xl shadow-2xl hover:scale-110 active:scale-95 transition-all border-4 border-white">
                   <Edit2 className="w-5 h-5" />
@@ -51,22 +56,11 @@ export const SettingsView: React.FC = () => {
 
             <div className="lg:col-span-9 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Input 
-                  label="Full Name"
-                  defaultValue={MOCK_USER.name} 
-                />
-                <Input 
-                  label="Email Address"
-                  type="email" 
-                  defaultValue={MOCK_USER.email} 
-                />
+                <Input label="Full Name" defaultValue={u.name} />
+                <Input label="Email Address" type="email" defaultValue={u.email} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Input 
-                  label="Phone Number"
-                  type="tel" 
-                  defaultValue={MOCK_USER.phone} 
-                />
+                <Input label="Phone Number" type="tel" defaultValue={u.phone ?? ""} />
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant px-1">Preferred Position</label>
                   <div className="relative">

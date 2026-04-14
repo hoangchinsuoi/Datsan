@@ -16,6 +16,7 @@ import AdminBookings from '../pages/Admin/Reports';
 import AdminUsers from '../pages/Admin/Users';
 import AdminReviews from '../pages/Admin/Reviews';
 import AdminSettings from '../pages/Admin/Settings';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -25,18 +26,18 @@ export const AppRoutes: React.FC = () => {
         <Route path="/search" element={<Search />} />
         <Route path="/field/:id" element={<FieldDetail />} />
         <Route path="/booking/:id" element={<Booking />} />
-        <Route path="/bookings" element={<MyBookings />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
       </Route>
-      <Route path="/admin" element={<Dashboard />} />
-      <Route path="/admin/fields" element={<AdminFields />} />
-      <Route path="/admin/bookings" element={<AdminBookings />} />
-      <Route path="/admin/users" element={<AdminUsers />} />
-      <Route path="/admin/reviews" element={<AdminReviews />} />
-      <Route path="/admin/settings" element={<AdminSettings />} />
+      <Route path="/admin" element={<ProtectedRoute requireAdmin><Dashboard /></ProtectedRoute>} />
+      <Route path="/admin/fields" element={<ProtectedRoute requireAdmin><AdminFields /></ProtectedRoute>} />
+      <Route path="/admin/bookings" element={<ProtectedRoute requireAdmin><AdminBookings /></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute requireAdmin><AdminUsers /></ProtectedRoute>} />
+      <Route path="/admin/reviews" element={<ProtectedRoute requireAdmin><AdminReviews /></ProtectedRoute>} />
+      <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -3,12 +3,13 @@ import { Calendar, Clock, MapPin, Ticket, CloudRain, Share2, MessageSquare } fro
 import { Button } from '../common/Button';
 import { cn } from '../../utils/format';
 import { Booking } from '../../types';
+import { formatVnd } from '../../utils/format';
 
 interface MyBookingsListProps {
   bookings: Booking[];
   onViewTicket: (booking: Booking) => void;
-  onCancel: (fieldName: string) => void;
-  onReview: (fieldName: string) => void;
+  onCancel: (booking: Booking) => void;
+  onReview: (booking: Booking) => void;
 }
 
 export const MyBookingsList: React.FC<MyBookingsListProps> = ({ bookings, onViewTicket, onCancel, onReview }) => {
@@ -43,7 +44,7 @@ export const MyBookingsList: React.FC<MyBookingsListProps> = ({ bookings, onView
                 </div>
               </div>
               <div className="text-right hidden sm:block">
-                <p className="text-3xl font-black font-headline text-on-surface">£{booking.amount}.00</p>
+                <p className="text-3xl font-black font-headline text-on-surface">{formatVnd(booking.amount)} ₫</p>
                 <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Paid via {booking.paymentMethod}</p>
               </div>
             </div>
@@ -60,7 +61,7 @@ export const MyBookingsList: React.FC<MyBookingsListProps> = ({ bookings, onView
                 <Button 
                   variant="ghost" 
                   className="text-red-500 hover:bg-red-50 rounded-xl"
-                  onClick={() => onCancel(booking.fieldName)}
+                  onClick={() => onCancel(booking)}
                 >
                   Cancel Match
                 </Button>
