@@ -6,7 +6,6 @@ export interface Field {
   rating: number;
   reviewsCount: number;
   image: string;
-  /** Hiển thị: thường lấy từ danh mục API */
   type: string;
   area: string;
   amenities: string[];
