@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Datsan.Server</RootNamespace>
     <AssemblyName>Datsan.Server</AssemblyName>
+    <UserSecretsId>datsan-server-secrets</UserSecretsId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>

@@ -70,6 +70,40 @@ public class FieldService
         return MapToDto(created!);
     }
 
+    public async Task<FieldDto> UpdateAsync(int id, FieldUpdateDto dto, CancellationToken cancellationToken = default)
+    {
+        var field = await _fields.GetByIdAsync(id, cancellationToken);
+        if (field is null)
+            throw new InvalidOperationException("Không tìm thấy sân.");
+
+        if (!await _fields.CategoryExistsAsync(dto.CategoryId, cancellationToken))
+            throw new InvalidOperationException("Danh mục không tồn tại.");
+
+        field.Name = dto.Name;
+        field.CategoryId = dto.CategoryId;
+        field.Location = dto.Location;
+        field.PricePerHour = dto.PricePerHour;
+        field.Description = dto.Description;
+        field.ImageUrl = dto.ImageUrl;
+        field.MaxPlayers = dto.MaxPlayers;
+
+        _fields.Update(field);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var updated = await _fields.GetByIdWithIncludesAsync(field.Id, cancellationToken);
+        return MapToDto(updated!);
+    }
+
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var field = await _fields.GetByIdAsync(id, cancellationToken);
+        if (field is null)
+            throw new InvalidOperationException("Không tìm thấy sân.");
+
+        _fields.Remove(field);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+    }
+
     private static FieldDto MapToDto(Field f)
     {
         var avg = f.Reviews.Count == 0 ? 0 : f.Reviews.Average(r => (double)r.Rating);

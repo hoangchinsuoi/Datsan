@@ -117,6 +117,10 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<FieldService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<ReviewService>();
+builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddHttpClient<AiChatService>();
 
 var app = builder.Build();
 

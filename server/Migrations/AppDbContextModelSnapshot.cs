@@ -87,6 +87,58 @@ namespace Datsan.Server.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Datsan.Server.Core.Models.ChatConversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AnonymousKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatConversations");
+                });
+
+            modelBuilder.Entity("Datsan.Server.Core.Models.ChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.ToTable("ChatMessages");
+                });
+
             modelBuilder.Entity("Datsan.Server.Core.Models.Field", b =>
                 {
                     b.Property<int>("Id")
@@ -228,6 +280,27 @@ namespace Datsan.Server.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Datsan.Server.Core.Models.ChatConversation", b =>
+                {
+                    b.HasOne("Datsan.Server.Core.Models.User", "User")
+                        .WithMany("ChatConversations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Datsan.Server.Core.Models.ChatMessage", b =>
+                {
+                    b.HasOne("Datsan.Server.Core.Models.ChatConversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+                });
+
             modelBuilder.Entity("Datsan.Server.Core.Models.Field", b =>
                 {
                     b.HasOne("Datsan.Server.Core.Models.Category", "Category")
@@ -263,6 +336,11 @@ namespace Datsan.Server.Migrations
                     b.Navigation("Fields");
                 });
 
+            modelBuilder.Entity("Datsan.Server.Core.Models.ChatConversation", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("Datsan.Server.Core.Models.Field", b =>
                 {
                     b.Navigation("Bookings");
@@ -273,6 +351,8 @@ namespace Datsan.Server.Migrations
             modelBuilder.Entity("Datsan.Server.Core.Models.User", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("ChatConversations");
 
                     b.Navigation("Reviews");
                 });

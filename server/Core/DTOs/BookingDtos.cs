@@ -23,6 +23,7 @@ public class BookingDto
     public string Status { get; set; } = "Pending";
     public string? Note { get; set; }
     public DateTime CreatedAt { get; set; }
+    public string? UserName { get; set; }
 }
 
 public class AvailableSlotDto

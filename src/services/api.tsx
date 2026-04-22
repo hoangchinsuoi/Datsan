@@ -50,6 +50,12 @@ export async function apiPost<T>(url: string, body?: unknown, config?: Parameter
   return data.data;
 }
 
+export async function apiPut<T>(url: string, body?: unknown, config?: Parameters<typeof api.put>[2]): Promise<T> {
+  const { data } = await api.put<ApiEnvelope<T>>(url, body, config);
+  if (!data.success) throw new Error(data.message);
+  return data.data;
+}
+
 export async function apiDeleteRaw(url: string, config?: Parameters<typeof api.delete>[1]): Promise<void> {
   const { data } = await api.delete<ApiEnvelope<unknown>>(url, config);
   if (!data.success) throw new Error(data.message);

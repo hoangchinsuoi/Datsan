@@ -8,11 +8,13 @@ import { fieldService } from "../services/fieldService";
 interface NewFieldModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Gọi sau khi tạo sân thành công (reload danh sách). */
+  /** Gọi sau khi tạo/cập nhật sân thành công (reload danh sách). */
   onCreated?: () => void;
+  /** Nếu truyền vào, modal sẽ ở chế độ chỉnh sửa. */
+  fieldToEdit?: Field | null;
 }
 
-export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, onCreated }) => {
+export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, onCreated, fieldToEdit }) => {
   const [step, setStep] = React.useState(1);
   const [categories, setCategories] = React.useState<{ id: number; name: string }[]>([]);
   const [name, setName] = React.useState("");
@@ -23,6 +25,33 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
   const [maxPlayers, setMaxPlayers] = React.useState(10);
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+
+  // Điền dữ liệu khi mở ở chế độ Edit
+  React.useEffect(() => {
+    if (isOpen && fieldToEdit) {
+      setName(fieldToEdit.name);
+      setDescription(fieldToEdit.description || "");
+      // Chú ý: Category ở đây là object {id, name}, cần tìm ID
+      // Field.categoryId có thể không có trong frontend Type, check types.ts
+      // Giả sử type.ts có categoryId hoặc ta tìm từ tên
+      void (async () => {
+        const cats = await fieldService.getCategories();
+        const found = cats.find(c => c.name === fieldToEdit.type);
+        if (found) setCategoryId(found.id);
+      })();
+      setLocation(fieldToEdit.location);
+      setPricePerHour(String(fieldToEdit.price));
+      setMaxPlayers(fieldToEdit.maxPlayers || 10);
+    } else if (isOpen && !fieldToEdit) {
+      // Reset form khi mở ở chế độ Thêm mới
+      setName("");
+      setDescription("");
+      setLocation("");
+      setPricePerHour("");
+      setMaxPlayers(10);
+      setStep(1);
+    }
+  }, [isOpen, fieldToEdit]);
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -53,7 +82,7 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
     }
     setSubmitting(true);
     try {
-      await fieldService.createField({
+      const payload = {
         name: name.trim(),
         categoryId,
         location: location.trim(),
@@ -61,11 +90,18 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
         description: description.trim() || undefined,
         imageUrl: null,
         maxPlayers,
-      });
+      };
+
+      if (fieldToEdit) {
+        await fieldService.updateField(Number(fieldToEdit.id), payload);
+      } else {
+        await fieldService.createField(payload);
+      }
+
       onCreated?.();
       close();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Tạo sân thất bại.");
+      setError(e instanceof Error ? e.message : "Thao tác thất bại.");
     } finally {
       setSubmitting(false);
     }
@@ -97,9 +133,11 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
             <div className="w-full md:w-80 bg-[#121417] p-10 text-white flex flex-col justify-between">
               <div>
                 <div className="w-16 h-16 bg-[#146312] rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-green-900/40">
-                  <Plus className="w-8 h-8 text-white" />
+                  {fieldToEdit ? <Zap className="w-8 h-8 text-white" /> : <Plus className="w-8 h-8 text-white" />}
                 </div>
-                <h3 className="text-3xl font-black font-headline tracking-tight leading-none mb-4">Add New Pitch</h3>
+                <h3 className="text-3xl font-black font-headline tracking-tight leading-none mb-4">
+                  {fieldToEdit ? "Update Pitch" : "Add New Pitch"}
+                </h3>
                 <p className="text-white/40 text-sm font-medium leading-relaxed mb-12">Lưu vào SQL Server qua API (Admin JWT).</p>
                 <div className="space-y-6">
                   {steps.map((s) => (
@@ -251,13 +289,13 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
                       Back
                     </Button>
                   )}
-                  <Button
+                    <Button
                     type="button"
                     disabled={submitting}
                     onClick={() => (step < 3 ? setStep(step + 1) : void handleDeploy())}
                     className="flex-[2] py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20"
                   >
-                    {step === 3 ? (submitting ? "Saving…" : "Deploy Pitch") : "Next Step"}
+                    {step === 3 ? (submitting ? "Saving…" : (fieldToEdit ? "Save Changes" : "Deploy Pitch")) : "Next Step"}
                   </Button>
                 </div>
               </div>

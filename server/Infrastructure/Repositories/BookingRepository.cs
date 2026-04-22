@@ -73,4 +73,14 @@ public class BookingRepository : IBookingRepository
             .OrderBy(b => b.StartTime)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Booking>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _db.Bookings
+            .AsNoTracking()
+            .Include(b => b.Field)
+            .Include(b => b.User)
+            .OrderByDescending(b => b.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
 }

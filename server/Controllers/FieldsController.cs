@@ -1,4 +1,4 @@
-﻿using Datsan.Server.Application.Services;
+using Datsan.Server.Application.Services;
 using Datsan.Server.Core.DTOs;
 using Datsan.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -86,6 +86,42 @@ public class FieldsController : ControllerBase
         {
             var field = await _fieldService.CreateAsync(dto, cancellationToken);
             return Ok(ApiResponse.Success("Tạo sân thành công", field));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
+        }
+    }
+
+    /// <summary>
+    /// Admin: Cập nhật thông tin sân
+    /// </summary>
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateField(int id, [FromBody] FieldUpdateDto dto, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var field = await _fieldService.UpdateAsync(id, dto, cancellationToken);
+            return Ok(ApiResponse.Success("Cập nhật sân thành công", field));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
+        }
+    }
+
+    /// <summary>
+    /// Admin: Xóa sân
+    /// </summary>
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteField(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _fieldService.DeleteAsync(id, cancellationToken);
+            return Ok(ApiResponse.Success("Xóa sân thành công", null));
         }
         catch (Exception ex)
         {

@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "./api";
+import { apiGet, apiPost, apiPut, apiDeleteRaw } from "./api";
 import type { Field } from "../types";
 import { mapFieldDto, type FieldDto } from "../utils/apiMappers";
 
@@ -59,6 +59,23 @@ export const fieldService = {
   }): Promise<Field> {
     const data = await apiPost<FieldDto>("/fields", body);
     return mapFieldDto(data);
+  },
+
+  async updateField(id: number, body: {
+    name: string;
+    categoryId: number;
+    location: string;
+    pricePerHour: number;
+    description?: string;
+    imageUrl?: string | null;
+    maxPlayers: number;
+  }): Promise<Field> {
+    const data = await apiPut<FieldDto>(`/fields/${id}`, body);
+    return mapFieldDto(data);
+  },
+
+  async deleteField(id: number): Promise<void> {
+    await apiDeleteRaw(`/fields/${id}`);
   },
 
   async getCategories(): Promise<{ id: number; name: string; description?: string | null }[]> {

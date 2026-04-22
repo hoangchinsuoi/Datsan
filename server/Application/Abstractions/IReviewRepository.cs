@@ -6,5 +6,8 @@ public interface IReviewRepository
 {
     Task<IReadOnlyList<Review>> GetByFieldIdWithUserAsync(int fieldId, CancellationToken cancellationToken = default);
     Task<Review?> GetByUserAndFieldAsync(int userId, int fieldId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Review>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default);
+    Task<Review?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     void Add(Review review);
+    void Remove(Review review);
 }

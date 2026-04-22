@@ -26,6 +26,7 @@ export interface Booking {
   amount: number;
   status: "Confirmed" | "Pending" | "Cancelled" | "Completed";
   paymentMethod: string;
+  userName?: string;
 }
 
 export interface AuthUser {

@@ -12,6 +12,11 @@ public class FieldRepository : IFieldRepository
     public FieldRepository(AppDbContext db) => _db = db;
 
     public void Add(Field field) => _db.Fields.Add(field);
+    public void Update(Field field) => _db.Fields.Update(field);
+    public void Remove(Field field) => _db.Fields.Remove(field);
+
+    public Task<Field?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        _db.Fields.FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
 
     public Task<bool> FieldExistsAsync(int fieldId, CancellationToken cancellationToken = default) =>
         _db.Fields.AnyAsync(f => f.Id == fieldId, cancellationToken);

@@ -15,8 +15,9 @@ public interface IBookingRepository
         int? excludeBookingId,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Booking>> GetByFieldAndDateAsync(
-        int fieldId,
-        DateOnly bookingDate,
+        int fieldId, 
+        DateOnly bookingDate, 
         CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Booking>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default);
     void Add(Booking booking);
 }

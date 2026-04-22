@@ -139,6 +139,26 @@ public class BookingService
         return slots;
     }
 
+    public async Task<IReadOnlyList<BookingDto>> GetAdminBookingsAsync(CancellationToken cancellationToken = default)
+    {
+        var list = await _bookings.GetAllWithDetailsAsync(cancellationToken);
+        return list.Select(MapToDto).ToList();
+    }
+
+    public async Task<bool> UpdateStatusAsync(int bookingId, string status, CancellationToken cancellationToken = default)
+    {
+        if (!Enum.TryParse<BookingStatus>(status, true, out var newStatus))
+            return false;
+
+        var booking = await _bookings.GetByIdAsync(bookingId, cancellationToken);
+        if (booking is null)
+            return false;
+
+        booking.Status = newStatus;
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private static BookingDto MapToDto(Booking b) =>
         new()
         {
@@ -152,5 +172,6 @@ public class BookingService
             Status = b.Status.ToString(),
             Note = b.Note,
             CreatedAt = b.CreatedAt,
+            UserName = b.User?.FullName ?? (b.User?.Username ?? "Unknown")
         };
 }

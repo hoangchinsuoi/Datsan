@@ -26,4 +26,19 @@ public class ReviewRepository : IReviewRepository
             .ToListAsync(cancellationToken);
         return list;
     }
+
+    public async Task<IReadOnlyList<Review>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _db.Reviews
+            .AsNoTracking()
+            .Include(r => r.User)
+            .Include(r => r.Field)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<Review?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
+        _db.Reviews.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+
+    public void Remove(Review review) => _db.Reviews.Remove(review);
 }

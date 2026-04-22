@@ -19,6 +19,26 @@
             Lấy danh sách booking của người dùng hiện tại
             </summary>
         </member>
+        <member name="M:Datsan.Server.Controllers.BookingsController.GetAllBookings(System.Threading.CancellationToken)">
+            <summary>
+            Admin: Lấy toàn bộ danh sách booking hệ thống
+            </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.BookingsController.UpdateBookingStatus(System.Int32,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Admin: Cập nhật trạng thái đơn đặt sân
+            </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.ChatController.GetHistory(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Lấy lịch sử tin nhắn đã lưu. Khách ẩn danh cần gửi đúng clientSessionId đã tạo cuộc trò chuyện.
+            </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.DashboardController.GetStats(System.Threading.CancellationToken)">
+            <summary>
+            Admin: Lấy dữ liệu thống kê Dashboard
+            </summary>
+        </member>
         <member name="M:Datsan.Server.Controllers.FieldsController.GetFields(System.String,System.Nullable{System.Int32},System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách tất cả sân (có hỗ trợ filter, search)
@@ -39,6 +59,16 @@
             Admin: Tạo sân mới
             </summary>
         </member>
+        <member name="M:Datsan.Server.Controllers.FieldsController.UpdateField(System.Int32,Datsan.Server.Core.DTOs.FieldUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Admin: Cập nhật thông tin sân
+            </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.FieldsController.DeleteField(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Admin: Xóa sân
+            </summary>
+        </member>
         <member name="M:Datsan.Server.Controllers.ReviewsController.GetReviews(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách đánh giá của một sân
@@ -48,6 +78,42 @@
             <summary>
             Tạo đánh giá mới (chỉ Member đã đăng nhập mới được)
             </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.ReviewsController.GetAllReviewsAdmin(System.Threading.CancellationToken)">
+            <summary>
+            Admin: Lấy tất cả review
+            </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.ReviewsController.DeleteReviewAdmin(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Admin: Xóa review
+            </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.UsersController.GetAllUsers(System.Threading.CancellationToken)">
+            <summary>
+            Admin: Lấy danh sách toàn bộ người dùng
+            </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.UsersController.ToggleStatus(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Admin: Khóa/Mở khóa tài khoản
+            </summary>
+        </member>
+        <member name="M:Datsan.Server.Controllers.UsersController.ChangeRole(System.Int32,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Admin: Thay đổi vai trò người dùng
+            </summary>
+        </member>
+        <member name="P:Datsan.Server.Core.DTOs.ChatAskRequestDto.ClientSessionId">
+            <summary>GUID phiên ẩn danh từ client; bắt buộc khi chưa đăng nhập.</summary>
+        </member>
+        <member name="P:Datsan.Server.Core.Models.ChatConversation.AnonymousKey">
+            <summary>
+            Khóa phiên ẩn danh từ client (GUID), bắt buộc khi UserId null.
+            </summary>
+        </member>
+        <member name="P:Datsan.Server.Core.Models.ChatMessage.Role">
+            <summary>user hoặc assistant</summary>
         </member>
         <member name="T:Datsan.Server.Migrations.InitialCreate">
             <inheritdoc />
@@ -71,6 +137,18 @@
             <inheritdoc />
         </member>
         <member name="M:Datsan.Server.Migrations.DecimalPrecision.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Datsan.Server.Migrations.AddChatHistory">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddChatHistory.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddChatHistory.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddChatHistory.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
     </members>

@@ -11,6 +11,7 @@ import { formatVnd } from "../../utils/format";
 
 const AdminFields: React.FC = () => {
   const [isNewFieldOpen, setIsNewFieldOpen] = React.useState(false);
+  const [fieldToEdit, setFieldToEdit] = React.useState<Field | null>(null);
   const [fields, setFields] = React.useState<Field[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -32,13 +33,34 @@ const AdminFields: React.FC = () => {
     void load();
   }, [load]);
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Bạn có chắc muốn xóa sân này? Hành động này không thể hoàn tác.")) return;
+    try {
+      await fieldService.deleteField(id);
+      void load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Xóa thất bại.");
+    }
+  };
+
+  const openNew = () => {
+    setFieldToEdit(null);
+    setIsNewFieldOpen(true);
+  };
+
+  const openEdit = (f: Field) => {
+    setFieldToEdit(f);
+    setIsNewFieldOpen(true);
+  };
+
   return (
     <div className="flex min-h-screen bg-[#F8F9FA]">
-      <AdminSidebar onNewFieldClick={() => setIsNewFieldOpen(true)} />
+      <AdminSidebar onNewFieldClick={openNew} />
       <NewFieldModal
         isOpen={isNewFieldOpen}
         onClose={() => setIsNewFieldOpen(false)}
         onCreated={() => void load()}
+        fieldToEdit={fieldToEdit}
       />
 
       <main className="flex-1 md:ml-72 p-8 lg:p-12">
@@ -47,7 +69,7 @@ const AdminFields: React.FC = () => {
             <h2 className="text-4xl font-black font-headline tracking-tight text-on-surface">Field Inventory</h2>
             <p className="text-on-surface-variant mt-2 font-medium">Dữ liệu từ SQL Server qua API.</p>
           </div>
-          <Button onClick={() => setIsNewFieldOpen(true)} className="flex items-center gap-2 shadow-xl shadow-primary/20">
+          <Button onClick={openNew} className="flex items-center gap-2 shadow-xl shadow-primary/20">
             <PlusCircle className="w-5 h-5" /> Add New Pitch
           </Button>
         </header>
@@ -124,10 +146,20 @@ const AdminFields: React.FC = () => {
                     >
                       <Eye className="w-4 h-4 mr-2" /> View
                     </Link>
-                    <Button variant="ghost" size="sm" className="bg-surface-container-low">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="bg-surface-container-low"
+                      onClick={() => openEdit(field)}
+                    >
                       <Edit2 className="w-4 h-4 mr-2" /> Edit
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-red-500 bg-surface-container-low">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-red-500 bg-surface-container-low"
+                      onClick={() => handleDelete(Number(field.id))}
+                    >
                       <Trash2 className="w-4 h-4 mr-2" /> Delete
                     </Button>
                   </div>

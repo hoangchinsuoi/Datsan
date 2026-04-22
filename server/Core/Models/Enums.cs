@@ -1,4 +1,4 @@
-﻿namespace Datsan.Server.Core.Models;
+namespace Datsan.Server.Core.Models;
 
 public enum FieldStatus
 {
@@ -19,5 +19,6 @@ public enum UserRole
 {
     Guest,
     Member,
-    Admin
+    Admin,
+    Owner
 }

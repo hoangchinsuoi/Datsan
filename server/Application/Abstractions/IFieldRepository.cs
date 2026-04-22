@@ -4,6 +4,7 @@ namespace Datsan.Server.Application.Abstractions;
 
 public interface IFieldRepository
 {
+    Task<Field?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
     Task<Field?> GetByIdWithIncludesAsync(int id, CancellationToken cancellationToken = default);
     Task<List<Field>> QueryFieldsAsync(
         string? search,
@@ -15,4 +16,6 @@ public interface IFieldRepository
     Task<bool> CategoryExistsAsync(int categoryId, CancellationToken cancellationToken = default);
     Task<bool> FieldExistsAsync(int fieldId, CancellationToken cancellationToken = default);
     void Add(Field field);
+    void Update(Field field);
+    void Remove(Field field);
 }

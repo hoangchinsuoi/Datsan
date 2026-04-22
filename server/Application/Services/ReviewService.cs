@@ -56,6 +56,22 @@ public class ReviewService
         return MapToDto(row);
     }
 
+    public async Task<IReadOnlyList<ReviewDto>> GetAllReviewsAsync(CancellationToken cancellationToken = default)
+    {
+        var list = await _reviews.GetAllWithDetailsAsync(cancellationToken);
+        return list.Select(MapToDto).ToList();
+    }
+
+    public async Task<bool> DeleteReviewAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var review = await _reviews.GetByIdAsync(id, cancellationToken);
+        if (review is null) return false;
+
+        _reviews.Remove(review);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private static ReviewDto MapToDto(Review r) =>
         new()
         {
@@ -64,5 +80,6 @@ public class ReviewService
             Rating = r.Rating,
             Comment = r.Comment,
             CreatedAt = r.CreatedAt,
+            FieldName = r.Field?.Name ?? string.Empty
         };
 }

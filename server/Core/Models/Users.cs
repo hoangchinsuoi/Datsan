@@ -18,4 +18,5 @@ public class User
     // Navigation
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
+    public ICollection<ChatConversation> ChatConversations { get; set; } = new List<ChatConversation>();
 }

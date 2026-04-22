@@ -88,4 +88,43 @@ public class BookingsController : ControllerBase
             return BadRequest(ApiResponse.Fail(ex.Message, null));
         }
     }
+
+    /// <summary>
+    /// Admin: Lấy toàn bộ danh sách booking hệ thống
+    /// </summary>
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin")]
+    public async Task<IActionResult> GetAllBookings(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var bookings = await _bookingService.GetAdminBookingsAsync(cancellationToken);
+            return Ok(ApiResponse.Success("Lấy danh sách booking toàn hệ thống thành công", bookings));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
+        }
+    }
+
+    /// <summary>
+    /// Admin: Cập nhật trạng thái đơn đặt sân
+    /// </summary>
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateBookingStatus(int id, [FromBody] string status, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var success = await _bookingService.UpdateStatusAsync(id, status, cancellationToken);
+            if (success)
+                return Ok(ApiResponse.Success("Cập nhật trạng thái booking thành công", null));
+
+            return BadRequest(ApiResponse.Fail("Không thể cập nhật trạng thái booking", null));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
+        }
+    }
 }

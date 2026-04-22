@@ -48,6 +48,7 @@ export type BookingDto = {
   status: string;
   note?: string | null;
   createdAt: string;
+  userName?: string | null;
 };
 
 const bookingStatuses = ['Confirmed', 'Pending', 'Cancelled', 'Completed'] as const;
@@ -72,6 +73,7 @@ export function mapBookingDto(dto: BookingDto, fieldImage?: string): Booking {
     amount: Number(dto.totalPrice),
     status: normalizeBookingStatus(dto.status),
     paymentMethod: 'Card',
+    userName: dto.userName || undefined,
   };
 }
 

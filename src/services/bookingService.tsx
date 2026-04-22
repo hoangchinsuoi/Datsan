@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDeleteRaw } from "./api";
+import { apiGet, apiPost, apiDeleteRaw, apiPut } from "./api";
 import type { Booking } from "../types";
 import { mapBookingDto, type BookingDto, mapAvailableSlotDto, type AvailableSlotDto, type AvailableSlot } from "../utils/apiMappers";
 
@@ -28,5 +28,14 @@ export const bookingService = {
   async getAvailableSlots(fieldId: string, date: string): Promise<AvailableSlot[]> {
     const rows = await apiGet<AvailableSlotDto[]>(`/bookings/available-slots?fieldId=${fieldId}&date=${date}`);
     return rows.map((s) => mapAvailableSlotDto(s));
+  },
+
+  async getAdminBookings(): Promise<Booking[]> {
+    const rows = await apiGet<BookingDto[]>("/bookings/admin");
+    return rows.map((b) => mapBookingDto(b));
+  },
+
+  async updateBookingStatus(id: string, status: string): Promise<void> {
+    await apiPut(`/bookings/${encodeURIComponent(id)}/status`, status);
   },
 };
