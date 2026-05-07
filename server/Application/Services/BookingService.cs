@@ -133,7 +133,8 @@ public class BookingService
                 Price = field.PricePerHour * 1.5m // 90 minutes
             });
             
-            currentStart = currentEnd;
+            // Add a 30-minute break before the next slot
+            currentStart = currentEnd.AddMinutes(30);
         }
         
         return slots;

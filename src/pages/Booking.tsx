@@ -16,7 +16,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { BookingCalendar } from '../components/booking/BookingCalendar';
 import type { Field } from '../types';
@@ -128,13 +128,22 @@ const BookingPage: React.FC = () => {
     setBookingError(null);
     try {
       const bookingDate = calendarCellToIsoDate(selectedDate);
-      await bookingService.createBooking({
+      const newBooking = await bookingService.createBooking({
         fieldId: Number(field.id),
         bookingDate,
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
         note: matchInfo.teamName ? `Đội: ${matchInfo.teamName}` : undefined,
       });
+
+      if (paymentMethod === 'card') {
+        const vnpayData = await bookingService.createVnpayPaymentUrl(newBooking.id.toString(), {
+          orderInfo: `Thanh toan dat san ${field.name}`,
+        });
+        window.location.href = vnpayData.paymentUrl;
+        return;
+      }
+
       setIsBooked(true);
     } catch (e) {
       setBookingError(e instanceof Error ? e.message : "Đặt sân thất bại.");
@@ -484,7 +493,7 @@ const BookingPage: React.FC = () => {
                       paymentMethod === 'card' ? "bg-white text-on-surface border-white" : "bg-transparent text-white border-white/20 hover:bg-white/5"
                     )}
                   >
-                    Credit Card
+                    VNPay (QR)
                   </button>
                   <button 
                     onClick={() => setPaymentMethod('credits')}

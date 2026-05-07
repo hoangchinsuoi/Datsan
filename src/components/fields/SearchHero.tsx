@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { MapPin, Calendar, Search, ChevronDown, Target } from 'lucide-react';
 import { Button } from '../common/Button';
 import { cn } from '../../utils/format';

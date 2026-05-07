@@ -13,10 +13,10 @@ export const Footer: React.FC = () => {
         </div>
         
         <div className="flex flex-wrap justify-center gap-8 text-xs uppercase tracking-widest font-medium">
-          <Link to="#" className="text-on-surface-variant hover:text-primary underline decoration-secondary decoration-2 underline-offset-4">Privacy</Link>
-          <Link to="#" className="text-on-surface-variant hover:text-primary">Terms</Link>
-          <Link to="#" className="text-on-surface-variant hover:text-primary">Stadium Hospitality</Link>
-          <Link to="#" className="text-on-surface-variant hover:text-primary">Contact</Link>
+          <Link to="/privacy" className="text-on-surface-variant hover:text-primary">Privacy</Link>
+          <Link to="/terms" className="text-on-surface-variant hover:text-primary">Terms</Link>
+          <Link to="/hospitality" className="text-on-surface-variant hover:text-primary">Stadium Hospitality</Link>
+          <Link to="/contact" className="text-on-surface-variant hover:text-primary">Contact</Link>
         </div>
       </div>
     </footer>

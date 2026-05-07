@@ -14,6 +14,11 @@
             Đăng nhập
             </summary>
         </member>
+        <member name="M:Datsan.Server.Controllers.AuthController.UpdateProfile(Datsan.Server.Application.Abstractions.IUserService,Datsan.Server.Core.DTOs.UpdateProfileDto,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật thông tin cá nhân
+            </summary>
+        </member>
         <member name="M:Datsan.Server.Controllers.BookingsController.GetMyBookings(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách booking của người dùng hiện tại
@@ -104,6 +109,11 @@
             Admin: Thay đổi vai trò người dùng
             </summary>
         </member>
+        <member name="M:Datsan.Server.Controllers.UsersController.InviteAdmin(Datsan.Server.Core.DTOs.RegisterDto,System.Threading.CancellationToken)">
+            <summary>
+            Admin: Mời quản trị viên mới
+            </summary>
+        </member>
         <member name="P:Datsan.Server.Core.DTOs.ChatAskRequestDto.ClientSessionId">
             <summary>GUID phiên ẩn danh từ client; bắt buộc khi chưa đăng nhập.</summary>
         </member>
@@ -149,6 +159,18 @@
             <inheritdoc />
         </member>
         <member name="M:Datsan.Server.Migrations.AddChatHistory.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Datsan.Server.Migrations.AddUserAvatarUrl">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddUserAvatarUrl.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddUserAvatarUrl.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddUserAvatarUrl.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
     </members>

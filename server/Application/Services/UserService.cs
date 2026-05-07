@@ -53,4 +53,50 @@ public class UserService : IUserService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }
+    public async Task<bool> InviteAdminAsync(RegisterDto dto, CancellationToken cancellationToken = default)
+    {
+        if (await _users.UsernameOrEmailTakenAsync(dto.Username, dto.Email, cancellationToken))
+            throw new InvalidOperationException("Username hoặc Email đã tồn tại.");
+
+        var user = new User
+        {
+            FullName = dto.FullName,
+            Username = dto.Username,
+            Email = dto.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+            Phone = dto.Phone,
+            Role = UserRole.Admin,
+            IsActive = true,
+        };
+
+        _users.Add(user);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<UserDetailDto?> UpdateProfileAsync(int userId, UpdateProfileDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _users.GetByIdAsync(userId, cancellationToken);
+        if (user is null) return null;
+
+        user.FullName = dto.FullName;
+        user.Email = dto.Email;
+        user.Phone = dto.Phone;
+        user.AvatarUrl = dto.AvatarUrl;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new UserDetailDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Username = user.Username,
+            Email = user.Email,
+            Role = user.Role.ToString(),
+            Phone = user.Phone,
+            AvatarUrl = user.AvatarUrl,
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt
+        };
+    }
 }

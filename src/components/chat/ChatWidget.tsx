@@ -8,9 +8,10 @@ import {
   fetchChatHistory,
   getStoredConversationId,
   setStoredConversationId,
+  sendUserMessage,
 } from "../../services/chatService";
 
-type Sender = "user" | "bot";
+type Sender = "user" | "bot" | "admin";
 
 interface ChatMessage {
   id: string;
@@ -43,6 +44,7 @@ export const ChatWidget: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     createMessage("bot", BOT_WELCOME),
   ]);
+  const [chatMode, setChatMode] = useState<"ai" | "human">("ai");
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -61,33 +63,28 @@ export const ChatWidget: React.FC = () => {
       return;
     }
 
-    setMessages([createMessage("bot", "Đang tải hội thoại...")]);
-
-    let cancelled = false;
-    void (async () => {
+    const loadHistory = async () => {
       try {
         const client = ensureChatClientSessionId();
-        const rows = await fetchChatHistory(stored, client);
-        if (cancelled) {
-          return;
-        }
+        const rows = await fetchChatHistory(stored!, client);
+        if (cancelled) return;
         const mapped = rows.map((row) =>
-          createMessage(row.role === "user" ? "user" : "bot", row.content)
+          createMessage(row.role === "user" ? "user" : row.role === "admin" ? "admin" : "bot", row.content)
         );
         setMessages([createMessage("bot", BOT_WELCOME), ...mapped]);
-      } catch {
-        if (!cancelled) {
-          clearStoredConversationId();
-          setConversationId(null);
-          setMessages([createMessage("bot", BOT_WELCOME)]);
-        }
+      } catch (e) {
+        /* ignore */
       }
-    })();
+    };
+
+    void loadHistory();
+    const interval = setInterval(loadHistory, 3000);
 
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
-  }, [open]);
+  }, [open, conversationId]);
 
   const canSend = useMemo(() => input.trim().length > 0 && !isSending, [input, isSending]);
 
@@ -104,13 +101,22 @@ export const ChatWidget: React.FC = () => {
 
     try {
       const client = ensureChatClientSessionId();
-      const result = await askAiChat(content, {
-        conversationId: conversationId ?? undefined,
-        clientSessionId: client,
-      });
-      setStoredConversationId(result.conversationId);
-      setConversationId(result.conversationId);
-      setMessages((prev) => [...prev, createMessage("bot", result.reply)]);
+      if (chatMode === "ai") {
+        const result = await askAiChat(content, {
+          conversationId: conversationId ?? undefined,
+          clientSessionId: client,
+        });
+        setStoredConversationId(result.conversationId);
+        setConversationId(result.conversationId);
+        setMessages((prev) => [...prev, createMessage("bot", result.reply)]);
+      } else {
+        const result = await sendUserMessage(content, {
+          conversationId: conversationId ?? undefined,
+          clientSessionId: client,
+        });
+        setStoredConversationId(result.conversationId);
+        setConversationId(result.conversationId);
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -153,6 +159,8 @@ export const ChatWidget: React.FC = () => {
                   className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
                     message.sender === "user"
                       ? "bg-secondary text-white rounded-br-md"
+                      : message.sender === "admin"
+                      ? "bg-primary text-white rounded-bl-md shadow-md"
                       : "bg-surface-container-low text-on-surface rounded-bl-md"
                   }`}
                 >
@@ -211,14 +219,24 @@ export const ChatWidget: React.FC = () => {
             </form>
 
             <div className="flex items-center justify-between mt-2 text-[11px] text-on-surface-variant">
-              <span>Cần thao tác nhanh?</span>
+              <span className="flex items-center gap-1.5">
+                {chatMode === "ai" ? (
+                  <>Bạn đang chat với AI</>
+                ) : (
+                  <>
+                    <span className={`w-1.5 h-1.5 rounded-full ${messages.some(m => m.sender === 'admin') ? 'bg-green-500' : 'bg-amber-400 animate-pulse'}`} />
+                    {messages.some(m => m.sender === 'admin') ? "Admin đã tham gia" : "Đang chờ Admin..."}
+                  </>
+                )}
+              </span>
               <div className="flex items-center gap-2">
-                <Link to="/search" className="hover:text-primary">
-                  Search
-                </Link>
-                <Link to="/bookings" className="hover:text-primary">
-                  Bookings
-                </Link>
+                <button 
+                  type="button"
+                  onClick={() => setChatMode(chatMode === "ai" ? "human" : "ai")}
+                  className="text-primary font-bold hover:underline"
+                >
+                  {chatMode === "ai" ? "Chat với Admin" : "Dùng AI trợ giúp"}
+                </button>
               </div>
             </div>
           </div>

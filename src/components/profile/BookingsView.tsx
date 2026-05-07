@@ -21,6 +21,22 @@ export const BookingsView: React.FC = () => {
   const [reviewBooking, setReviewBooking] = React.useState<Booking | null>(null);
   const [cancelBooking, setCancelBooking] = React.useState<Booking | null>(null);
   const [selectedBooking, setSelectedBooking] = React.useState<Booking | null>(null);
+  const [payingBookingId, setPayingBookingId] = React.useState<string | null>(null);
+
+  const handlePayWithVnpay = async (booking: Booking) => {
+    setPayingBookingId(booking.id);
+    try {
+      const data = await bookingService.createVnpayPaymentUrl(booking.id, {
+        orderInfo: `Thanh toan booking #${booking.id}`,
+      });
+      window.location.href = data.paymentUrl;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Không thể tạo link thanh toán VNPay.";
+      window.alert(message);
+    } finally {
+      setPayingBookingId(null);
+    }
+  };
 
   const handleReview = (booking: Booking) => {
     setReviewBooking(booking);
@@ -129,6 +145,8 @@ export const BookingsView: React.FC = () => {
                 onViewTicket={handleViewTicket}
                 onCancel={handleCancel}
                 onReview={handleReview}
+                onPayWithVnpay={handlePayWithVnpay}
+                payingBookingId={payingBookingId}
               />
             )}
           </section>

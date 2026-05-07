@@ -1,4 +1,4 @@
-import { apiGet, apiPut } from "./api";
+import { apiGet, apiPut, apiPost } from "./api";
 
 export type AdminUser = {
   id: number;
@@ -22,5 +22,9 @@ export const userService = {
 
   async changeRole(userId: number, role: string): Promise<void> {
     await apiPut(`/users/${userId}/role`, role);
+  },
+
+  async inviteAdmin(data: any): Promise<void> {
+    await apiPost("/users/invite-admin", data);
   },
 };

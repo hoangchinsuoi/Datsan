@@ -17,7 +17,7 @@ const Profile: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView onViewAll={() => setActiveTab('bookings')} />;
       case 'bookings':
         return <BookingsView />;
       case 'settings':

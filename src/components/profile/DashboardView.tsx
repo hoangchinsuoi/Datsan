@@ -1,12 +1,16 @@
 import React from "react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { Trophy, Clock, Star, ArrowRight, Calendar, MapPin } from "lucide-react";
 import { Button } from "../common/Button";
 import { cn } from "../../utils/format";
 import { useBookings } from "../../hooks/useBookings";
 import { useAuth } from "../../hooks/useAuth";
 
-export const DashboardView: React.FC = () => {
+interface DashboardViewProps {
+  onViewAll?: () => void;
+}
+
+export const DashboardView: React.FC<DashboardViewProps> = ({ onViewAll }) => {
   const { isAuthenticated } = useAuth();
   const { bookings, loading } = useBookings(isAuthenticated);
   const nextMatch = bookings[0];
@@ -109,7 +113,8 @@ export const DashboardView: React.FC = () => {
               <h3 className="text-2xl font-black font-headline">Recent Activity</h3>
               <button
                 type="button"
-                className="text-primary font-black text-xs uppercase tracking-widest flex items-center gap-2"
+                onClick={onViewAll}
+                className="text-primary font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
               >
                 View All <ArrowRight className="w-4 h-4" />
               </button>

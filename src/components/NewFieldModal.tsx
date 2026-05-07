@@ -1,9 +1,10 @@
 import React from "react";
-import { Button } from "./common/Button";
 import { X, Plus, Image as ImageIcon, MapPin, DollarSign, Info, Shield, Layers, Zap } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../utils/format";
 import { fieldService } from "../services/fieldService";
+import type { Field } from "../types";
+import { Button } from "./common/Button";
 
 interface NewFieldModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
   const [location, setLocation] = React.useState("");
   const [pricePerHour, setPricePerHour] = React.useState("");
   const [maxPlayers, setMaxPlayers] = React.useState(10);
+  const [imageUrl, setImageUrl] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -42,6 +44,7 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
       setLocation(fieldToEdit.location);
       setPricePerHour(String(fieldToEdit.price));
       setMaxPlayers(fieldToEdit.maxPlayers || 10);
+      setImageUrl(fieldToEdit.image || "");
     } else if (isOpen && !fieldToEdit) {
       // Reset form khi mở ở chế độ Thêm mới
       setName("");
@@ -49,6 +52,7 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
       setLocation("");
       setPricePerHour("");
       setMaxPlayers(10);
+      setImageUrl("");
       setStep(1);
     }
   }, [isOpen, fieldToEdit]);
@@ -73,6 +77,17 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
     onClose();
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleDeploy = async () => {
     setError(null);
     const price = Number(pricePerHour);
@@ -88,7 +103,7 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
         location: location.trim(),
         pricePerHour: price,
         description: description.trim() || undefined,
-        imageUrl: null,
+        imageUrl: imageUrl.trim() || null,
         maxPlayers,
       };
 
@@ -224,12 +239,24 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
                         className="w-full bg-surface-container-low border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 font-bold"
                       />
                     </div>
-                    <div className="space-y-2 opacity-50 pointer-events-none">
+                    <div className="space-y-2">
                       <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant px-1">Pitch Image</label>
-                      <div className="w-full h-48 border-2 border-dashed border-surface-container-highest rounded-3xl flex flex-col items-center justify-center gap-4">
-                        <ImageIcon className="w-6 h-6 text-on-surface-variant" />
-                        <p className="text-sm font-bold text-on-surface-variant">Upload (tùy chọn sau)</p>
-                      </div>
+                      <label className="block w-full h-48 border-2 border-dashed border-surface-container-highest rounded-3xl flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-primary/50 hover:bg-surface-container-low transition-colors relative overflow-hidden group">
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                        {imageUrl ? (
+                          <>
+                            <img src={imageUrl} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                              <p className="text-white font-bold text-sm">Click to change</p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <ImageIcon className="w-6 h-6 text-on-surface-variant group-hover:text-primary transition-colors" />
+                            <p className="text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors">Click to upload image</p>
+                          </>
+                        )}
+                      </label>
                     </div>
                   </motion.div>
                 )}
@@ -289,7 +316,7 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
                       Back
                     </Button>
                   )}
-                    <Button
+                  <Button
                     type="button"
                     disabled={submitting}
                     onClick={() => (step < 3 ? setStep(step + 1) : void handleDeploy())}

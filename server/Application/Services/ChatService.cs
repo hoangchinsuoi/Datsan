@@ -120,6 +120,61 @@ public class ChatService
         return new ChatHistoryResponseDto { Messages = items };
     }
 
+    public async Task<List<ChatConversationDto>> GetAllConversationsAsync(CancellationToken cancellationToken)
+    {
+        return await _db.ChatConversations
+            .AsNoTracking()
+            .Include(c => c.User)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new ChatConversationDto
+            {
+                Id = c.Id,
+                UserId = c.UserId,
+                UserName = c.User != null ? c.User.FullName : "Khách ẩn danh",
+                CreatedAt = c.CreatedAt,
+                LastMessage = _db.ChatMessages
+                    .Where(m => m.ConversationId == c.Id)
+                    .OrderByDescending(m => m.CreatedAt)
+                    .Select(m => m.Content)
+                    .FirstOrDefault() ?? ""
+            })
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Guid> SendUserMessageAsync(string message, Guid? conversationId, int? userId, string? clientKey, CancellationToken cancellationToken)
+    {
+        var conversation = await ResolveOrCreateConversationAsync(conversationId, userId, clientKey, cancellationToken);
+        
+        _db.ChatMessages.Add(new ChatMessage
+        {
+            Id = Guid.NewGuid(),
+            ConversationId = conversation.Id,
+            Role = "user",
+            Content = message,
+            CreatedAt = DateTime.UtcNow,
+        });
+
+        await _db.SaveChangesAsync(cancellationToken);
+        return conversation.Id;
+    }
+
+    public async Task ReplyAsAdminAsync(Guid conversationId, string message, CancellationToken cancellationToken)
+    {
+        var conversation = await _db.ChatConversations.FindAsync(new object[] { conversationId }, cancellationToken);
+        if (conversation == null) throw new Exception("Conversation not found");
+
+        _db.ChatMessages.Add(new ChatMessage
+        {
+            Id = Guid.NewGuid(),
+            ConversationId = conversationId,
+            Role = "admin",
+            Content = message,
+            CreatedAt = DateTime.UtcNow,
+        });
+
+        await _db.SaveChangesAsync(cancellationToken);
+    }
+
     private async Task<ChatConversation> ResolveOrCreateConversationAsync(
         Guid? conversationId,
         int? userId,

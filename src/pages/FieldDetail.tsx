@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Share2, Heart, ChevronRight, Grid, ShieldCheck, Calendar, Clock } from 'lucide-react';
+import { Star, MapPin, Share2, Heart, ChevronRight, Grid, ShieldCheck, Calendar, Clock, X, Maximize2 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { cn, formatVnd } from '../utils/format';
 
@@ -22,6 +22,7 @@ const FieldDetail: React.FC = () => {
   const [availableSlots, setAvailableSlots] = React.useState<AvailableSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = React.useState(false);
   const [selectedSlot, setSelectedSlot] = React.useState<AvailableSlot | null>(null);
+  const [isMapOpen, setIsMapOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!id) {
@@ -191,6 +192,31 @@ const FieldDetail: React.FC = () => {
 
           <section>
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <span className="w-1.5 h-8 bg-primary rounded-full" /> Vị trí sân
+            </h2>
+            <div className="relative w-full h-[400px] rounded-2xl overflow-hidden bg-surface-container-low shadow-inner border border-outline-variant/10 group">
+              <iframe
+                title="Bản đồ vị trí sân"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://www.google.com/maps?q=${encodeURIComponent(field.location)}&output=embed`}
+              ></iframe>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+              <button
+                onClick={() => setIsMapOpen(true)}
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur shadow px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-white hover:text-primary transition-all z-10"
+              >
+                <Maximize2 className="w-4 h-4" /> Phóng to bản đồ
+              </button>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
               <span className="w-1.5 h-8 bg-primary rounded-full" /> Đánh giá ({reviews.length})
             </h2>
             {reviews.length === 0 ? (
@@ -216,7 +242,7 @@ const FieldDetail: React.FC = () => {
                 <span className="w-1.5 h-8 bg-primary rounded-full" /> Availability
               </h2>
             </div>
-             <BookingCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+            <BookingCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} />
             <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mt-8">
               {loadingSlots ? (
                 <div className="col-span-full py-8 text-center text-on-surface-variant font-bold">Checking...</div>
@@ -226,14 +252,14 @@ const FieldDetail: React.FC = () => {
                 availableSlots.map((slot) => {
                   const isBooked = !!slot.status;
                   return (
-                    <button 
+                    <button
                       key={slot.time}
                       disabled={isBooked}
                       onClick={() => !isBooked && setSelectedSlot(slot)}
                       className={cn(
                         "p-4 rounded-2xl text-xs font-bold transition-all border-2",
-                        isBooked 
-                          ? "bg-surface-container-highest text-on-surface-variant/40 border-transparent cursor-not-allowed" 
+                        isBooked
+                          ? "bg-surface-container-highest text-on-surface-variant/40 border-transparent cursor-not-allowed"
                           : selectedSlot === slot
                             ? "bg-primary text-white border-primary shadow-lg scale-105"
                             : "bg-white border-outline-variant/10 hover:border-primary hover:text-primary text-on-surface stadium-shadow"
@@ -262,7 +288,7 @@ const FieldDetail: React.FC = () => {
                 <span className="font-bold text-primary">{field.rating}</span>
               </div>
             </div>
-            
+
             <div className="space-y-4 mb-8">
               <div className="p-4 bg-surface-container-low rounded-2xl">
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Date</label>
@@ -285,11 +311,11 @@ const FieldDetail: React.FC = () => {
             <Link to={`/booking/${field.id}`}>
               <Button className="w-full py-5 text-xl mb-4" variant="secondary">Book Now</Button>
             </Link>
-            
+
             <p className="text-center text-xs text-on-surface-variant px-4">
               You won't be charged yet. Cancellation is free up to 24h before kick-off.
             </p>
-            
+
             <div className="mt-8 pt-8 border-t border-surface-container-high">
               <div className="flex items-center gap-4 text-sm text-on-surface-variant">
                 <ShieldCheck className="w-5 h-5 text-primary" />
@@ -299,6 +325,29 @@ const FieldDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {isMapOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-5xl h-[80vh] rounded-[2rem] overflow-hidden flex flex-col relative animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between p-4 border-b border-outline-variant/20 bg-surface-container-lowest">
+              <h3 className="font-bold text-lg flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> {field.location}</h3>
+              <button onClick={() => setIsMapOpen(false)} className="p-2 hover:bg-surface-container-high rounded-full transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <iframe
+              title="Bản đồ vị trí sân lớn"
+              width="100%"
+              height="100%"
+              style={{ border: 0, flexGrow: 1 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://www.google.com/maps?q=${encodeURIComponent(field.location)}&output=embed`}
+            ></iframe>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -34,6 +34,7 @@ export function mapFieldDto(dto: FieldDto): Field {
     lighting: 'Pro LED',
     parking: 'On-site',
     description: dto.description?.trim() || '',
+    maxPlayers: dto.maxPlayers,
   };
 }
 

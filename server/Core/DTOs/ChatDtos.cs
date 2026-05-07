@@ -25,3 +25,18 @@ public class ChatHistoryResponseDto
 {
     public List<ChatHistoryItemDto> Messages { get; set; } = new();
 }
+
+public class ChatConversationDto
+{
+    public Guid Id { get; set; }
+    public int? UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string LastMessage { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+}
+
+public class ChatAdminReplyDto
+{
+    public Guid ConversationId { get; set; }
+    public string Message { get; set; } = string.Empty;
+}

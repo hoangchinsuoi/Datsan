@@ -10,6 +10,7 @@ public enum FieldStatus
 public enum BookingStatus
 {
     Pending,
+    Paid,
     Confirmed,
     Cancelled,
     Completed

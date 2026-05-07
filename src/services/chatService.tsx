@@ -84,3 +84,31 @@ export async function fetchChatHistory(conversationId: string, clientSessionId: 
   });
   return data.messages;
 }
+
+export async function sendUserMessage(
+  message: string,
+  options?: { conversationId?: string | null; clientSessionId?: string | null }
+): Promise<{ conversationId: string }> {
+  const clientSessionId = options?.clientSessionId ?? ensureChatClientSessionId();
+  return apiPost<{ conversationId: string }>("/chat/send", {
+    message,
+    clientSessionId,
+    conversationId: options?.conversationId,
+  });
+}
+
+export type AdminConversation = {
+  id: string;
+  userId?: number;
+  userName: string;
+  lastMessage: string;
+  createdAt: string;
+};
+
+export async function fetchAdminConversations(): Promise<AdminConversation[]> {
+  return apiGet<AdminConversation[]>("/chat/conversations");
+}
+
+export async function replyAsAdmin(conversationId: string, message: string): Promise<void> {
+  return apiPost<void>("/chat/admin-reply", { conversationId, message });
+}

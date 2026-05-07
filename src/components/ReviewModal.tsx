@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "./common/Button";
 import { Star, X, MessageSquare } from "lucide-react";
 import { cn } from "../utils/format";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { reviewService } from "../services/reviewService";
 
 interface ReviewModalProps {

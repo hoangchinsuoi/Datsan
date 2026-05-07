@@ -33,3 +33,26 @@ public class AvailableSlotDto
     public bool IsAvailable { get; set; }
     public decimal Price { get; set; }
 }
+
+public class VnpayCreatePaymentRequestDto
+{
+    public string? ClientIp { get; set; }
+    public string? OrderInfo { get; set; }
+}
+
+public class VnpayPaymentUrlDto
+{
+    public int BookingId { get; set; }
+    public string TxnRef { get; set; } = string.Empty;
+    public string PaymentUrl { get; set; } = string.Empty;
+}
+
+public class VnpayReturnResultDto
+{
+    public bool Success { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public int? BookingId { get; set; }
+    public string? TransactionNo { get; set; }
+    public string? ResponseCode { get; set; }
+    public string? RedirectUrl { get; set; }
+}

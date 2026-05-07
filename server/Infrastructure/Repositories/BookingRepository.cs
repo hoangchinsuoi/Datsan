@@ -42,7 +42,7 @@ public class BookingRepository : IBookingRepository
         int? excludeBookingId,
         CancellationToken cancellationToken = default)
     {
-        var active = new[] { BookingStatus.Pending, BookingStatus.Confirmed };
+        var active = new[] { BookingStatus.Pending, BookingStatus.Paid, BookingStatus.Confirmed };
 
         var q = _db.Bookings.Where(b =>
             b.FieldId == fieldId
@@ -62,7 +62,7 @@ public class BookingRepository : IBookingRepository
         DateOnly bookingDate, 
         CancellationToken cancellationToken = default)
     {
-        var active = new[] { BookingStatus.Pending, BookingStatus.Confirmed };
+        var active = new[] { BookingStatus.Pending, BookingStatus.Paid, BookingStatus.Confirmed };
         
         return await _db.Bookings
             .AsNoTracking()

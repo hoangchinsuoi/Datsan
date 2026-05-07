@@ -26,6 +26,13 @@ api.interceptors.response.use(
     
     if (err.response) {
       // Server trả về lỗi (400, 401, 500...)
+      if (err.response.status === 401) {
+        // Token hết hạn hoặc không hợp lệ
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+        return Promise.reject(new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."));
+      }
       msg = err.response.data?.message || err.message || "Lỗi máy chủ.";
     } else if (err.request) {
       // Không nhận được phản hồi từ server (Network Error)

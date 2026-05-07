@@ -80,21 +80,32 @@ const Dashboard: React.FC = () => {
                 </div>
                 
                 {stats.revenueItems.length > 0 ? (
-                  <>
-                    <div className="h-64 flex items-end justify-between gap-1">
+                  <div className="flex flex-col h-[300px]">
+                    <div className="flex-1 flex items-end justify-start gap-4 pb-2 border-b border-surface-container-highest/50 px-2 overflow-x-auto">
                       {stats.revenueItems.map((item, i) => {
                         const maxRev = Math.max(...stats.revenueItems.map(r => r.revenue)) || 1;
-                        const h = Math.max((item.revenue / maxRev) * 100, 2);
+                        const h = Math.max((item.revenue / maxRev) * 100, 5); // min 5% height
+                        // Format date from "yyyy-MM-dd" to "dd/MM"
+                        const dateObj = new Date(item.date);
+                        const dateLabel = !isNaN(dateObj.getTime()) ? `${dateObj.getDate()}/${dateObj.getMonth() + 1}` : item.date;
+
                         return (
-                          <div key={i} className="flex-1 bg-surface-container-low rounded-t-lg transition-all hover:bg-primary/20 relative group" style={{ height: `${h}%` }}>
-                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-10 transition-opacity">
-                              {formatVnd(Number(item.revenue))} ₫
+                          <div key={i} className="flex flex-col items-center justify-end h-full w-16 group shrink-0">
+                            <div 
+                              className="w-full bg-primary rounded-t-xl transition-all duration-300 hover:bg-primary/80 relative cursor-pointer" 
+                              style={{ height: `${h}%` }}
+                            >
+                              <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] font-bold py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap z-10 transition-opacity shadow-lg">
+                                {formatVnd(Number(item.revenue))} ₫
+                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-on-surface rotate-45"></div>
+                              </div>
                             </div>
+                            <span className="text-[10px] font-bold text-on-surface-variant mt-3 whitespace-nowrap">{dateLabel}</span>
                           </div>
                         );
                       })}
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <div className="h-64 flex items-center justify-center bg-surface-container-low rounded-xl">
                     <p className="text-on-surface-variant font-bold">Chưa có dữ liệu doanh thu</p>

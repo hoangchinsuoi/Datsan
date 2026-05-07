@@ -5,9 +5,11 @@ import { cn } from '../../utils/format';
 import { AdminSidebar } from '../../components/layout/AdminSidebar';
 import { NewFieldModal } from '../../components/NewFieldModal';
 import { userService, type AdminUser } from '../../services/userService';
+import { InviteAdminModal } from '../../components/InviteAdminModal';
 
 const AdminUsers: React.FC = () => {
   const [isNewFieldOpen, setIsNewFieldOpen] = React.useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
   const [users, setUsers] = React.useState<AdminUser[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -54,6 +56,7 @@ const AdminUsers: React.FC = () => {
     <div className="flex min-h-screen bg-[#F8F9FA]">
       <AdminSidebar onNewFieldClick={() => setIsNewFieldOpen(true)} />
       <NewFieldModal isOpen={isNewFieldOpen} onClose={() => setIsNewFieldOpen(false)} />
+      <InviteAdminModal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)} onSuccess={load} />
 
       <main className="flex-1 md:ml-72 p-8 lg:p-12">
         <header className="flex justify-between items-end mb-12">
@@ -61,7 +64,7 @@ const AdminUsers: React.FC = () => {
             <h2 className="text-4xl font-black font-headline tracking-tight text-on-surface">User Management</h2>
             <p className="text-on-surface-variant mt-2 font-medium">Quản lý tài khoản người chơi, phân quyền và truy cập.</p>
           </div>
-          <Button className="flex items-center gap-2" variant="outline" onClick={() => window.alert("Chức năng đang phát triển")}>
+          <Button className="flex items-center gap-2" variant="outline" onClick={() => setIsInviteModalOpen(true)}>
             <UsersIcon className="w-5 h-5" /> Invite Admin
           </Button>
         </header>

@@ -42,6 +42,7 @@ const AdminBookings: React.FC = () => {
   const stats = {
     total: bookings.length,
     pending: bookings.filter(b => b.status === "Pending").length,
+    paid: bookings.filter(b => b.status === "Paid").length,
     confirmed: bookings.filter(b => b.status === "Confirmed").length,
     cancelled: bookings.filter(b => b.status === "Cancelled").length,
   };
@@ -66,6 +67,7 @@ const AdminBookings: React.FC = () => {
           {[
             { label: 'Total Bookings', val: stats.total, color: 'text-primary' },
             { label: 'Pending', val: stats.pending, color: 'text-yellow-600' },
+            { label: 'Paid', val: stats.paid, color: 'text-blue-600' },
             { label: 'Confirmed', val: stats.confirmed, color: 'text-green-600' },
             { label: 'Cancelled', val: stats.cancelled, color: 'text-red-600' }
           ].map(s => (
@@ -111,6 +113,7 @@ const AdminBookings: React.FC = () => {
                       <span className={cn(
                         "text-[10px] px-2 py-1 rounded-full font-black uppercase tracking-widest",
                         b.status === 'Confirmed' ? "bg-green-100 text-green-700" :
+                        b.status === 'Paid' ? "bg-blue-100 text-blue-700" :
                         b.status === 'Pending' ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
                       )}>
                         {b.status}
@@ -119,7 +122,7 @@ const AdminBookings: React.FC = () => {
                     <td className="px-8 py-5 text-sm font-bold">{formatVnd(Number(b.amount))} ₫</td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex justify-end gap-2">
-                        {b.status === 'Pending' && (
+                        {(b.status === 'Pending' || b.status === 'Paid') && (
                           <>
                             <button 
                               onClick={() => handleUpdateStatus(b.id, "Confirmed")}

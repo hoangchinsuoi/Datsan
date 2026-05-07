@@ -74,4 +74,24 @@ public class UsersController : ControllerBase
             return BadRequest(ApiResponse.Fail(ex.Message, null));
         }
     }
+
+    /// <summary>
+    /// Admin: Mời quản trị viên mới
+    /// </summary>
+    [HttpPost("invite-admin")]
+    public async Task<IActionResult> InviteAdmin([FromBody] RegisterDto dto, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var success = await _userService.InviteAdminAsync(dto, cancellationToken);
+            if (success)
+                return Ok(ApiResponse.Success("Tạo tài khoản quản trị viên thành công", null));
+            
+            return BadRequest(ApiResponse.Fail("Không thể tạo tài khoản quản trị viên", null));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
+        }
+    }
 }

@@ -23,7 +23,7 @@ function mapAuthUserToUser(a: AuthUser): User {
     name: a.fullName,
     email: a.email,
     phone: "",
-    avatar: AVATAR_PLACEHOLDER,
+    avatar: a.avatarUrl || AVATAR_PLACEHOLDER,
     position: a.role,
     role: roleLower === "admin" ? "admin" : "user",
   };

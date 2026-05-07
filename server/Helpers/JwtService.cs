@@ -49,6 +49,7 @@ public class JwtService
             Username = user.Username,
             Email = user.Email,
             Role = user.Role.ToString(),
+            AvatarUrl = user.AvatarUrl,
             Token = tokenString,
         };
     }

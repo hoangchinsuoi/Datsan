@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { MapPin, Calendar, Trophy } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useNavigate, Link } from 'react-router-dom';

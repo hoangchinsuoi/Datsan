@@ -10,6 +10,41 @@ const AVATAR_FALLBACK =
 export const SettingsView: React.FC = () => {
   const { user } = useAuth();
   const u = user ?? { name: "", email: "", phone: "", avatar: AVATAR_FALLBACK };
+  const [avatarUrl, setAvatarUrl] = React.useState(u.avatar ?? AVATAR_FALLBACK);
+  const [fullName, setFullName] = React.useState(u.name);
+  const [email, setEmail] = React.useState(u.email);
+  const [phone, setPhone] = React.useState(u.phone ?? "");
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const { authService } = await import("../../services/authService");
+      await authService.updateProfile({
+        fullName,
+        email,
+        phone,
+        avatarUrl: avatarUrl !== AVATAR_FALLBACK ? avatarUrl : null
+      });
+      alert("Cập nhật thành công! Vui lòng đăng nhập lại để thấy thay đổi.");
+    } catch (e) {
+      alert("Lỗi khi cập nhật tài khoản.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-12">
       <header className="mb-12">
@@ -41,12 +76,13 @@ export const SettingsView: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
             <div className="lg:col-span-3 flex flex-col items-center gap-6">
               <div className="relative group">
-                <div className="w-40 h-40 rounded-[2.5rem] overflow-hidden border-8 border-surface-container-low stadium-shadow group-hover:scale-[1.02] transition-transform duration-500">
-                  <img src={u.avatar ?? AVATAR_FALLBACK} alt="Avatar" className="w-full h-full object-cover" />
+                <div className="w-40 h-40 rounded-[2.5rem] overflow-hidden border-8 border-surface-container-low stadium-shadow group-hover:scale-[1.02] transition-transform duration-500 bg-white">
+                  <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 </div>
-                <button className="absolute -bottom-2 -right-2 bg-primary text-white p-4 rounded-2xl shadow-2xl hover:scale-110 active:scale-95 transition-all border-4 border-white">
+                <label className="absolute -bottom-2 -right-2 bg-primary text-white p-4 rounded-2xl shadow-2xl hover:scale-110 active:scale-95 transition-all border-4 border-white cursor-pointer">
+                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                   <Edit2 className="w-5 h-5" />
-                </button>
+                </label>
               </div>
               <div className="text-center">
                 <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant mb-1">Photo Requirements</p>
@@ -56,11 +92,11 @@ export const SettingsView: React.FC = () => {
 
             <div className="lg:col-span-9 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Input label="Full Name" defaultValue={u.name} />
-                <Input label="Email Address" type="email" defaultValue={u.email} />
+                <Input label="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                <Input label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Input label="Phone Number" type="tel" defaultValue={u.phone ?? ""} />
+                <Input label="Phone Number" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant px-1">Preferred Position</label>
                   <div className="relative">
@@ -121,7 +157,9 @@ export const SettingsView: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8">
           <Button variant="ghost" className="px-10 py-5 rounded-2xl text-xs font-black uppercase tracking-widest">Discard Changes</Button>
-          <Button className="px-16 py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl shadow-primary/20">Save Account Changes</Button>
+          <Button onClick={handleSave} disabled={isSaving} className="px-16 py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl shadow-primary/20">
+            {isSaving ? "Saving..." : "Save Account Changes"}
+          </Button>
         </div>
       </div>
     </div>

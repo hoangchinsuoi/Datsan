@@ -5,6 +5,10 @@ namespace Datsan.Server.Application.Services;
 
 public class AiChatService
 {
+    private static readonly string[] FallbackModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
+    private const string ProviderUnavailableReply =
+        "Xin lỗi, hệ thống AI đang quá tải hoặc tạm thời không khả dụng. Bạn thử lại sau ít phút giúp mình nhé.";
+
     private const string SystemInstruction = """
         You are a concise Vietnamese support assistant for a football field booking app called "The Pitch Editorial".
         Only help with: booking a field, viewing/canceling bookings, account login/register, and basic app troubleshooting.
@@ -38,14 +42,8 @@ public class AiChatService
             throw new InvalidOperationException("Gemini API key is missing. Set Ai:GeminiApiKey or GEMINI_API_KEY.");
         }
 
-        var model = _configuration["Ai:Model"];
-        if (string.IsNullOrWhiteSpace(model))
-        {
-            model = "gemini-2.0-flash";
-        }
-
         var maxPart = _configuration.GetValue("Ai:MaxGeminiPartLength", 2000);
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
+        var modelsToTry = BuildModelCandidates(_configuration["Ai:Model"]);
 
         var contents = new List<object>();
         foreach (var (role, content) in priorMessages)
@@ -73,22 +71,76 @@ public class AiChatService
             contents,
         };
 
-        using var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
-        if (!response.IsSuccessStatusCode)
+        var lastError = string.Empty;
+        foreach (var model in modelsToTry)
         {
-            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException($"AI provider error ({(int)response.StatusCode}): {errorBody}");
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
+            using var response = await _httpClient.PostAsJsonAsync(url, payload, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                lastError = $"Model {model} failed ({(int)response.StatusCode}): {errorBody}";
+
+                // Retry with next model only when model/path is unavailable.
+                if ((int)response.StatusCode == 404)
+                {
+                    continue;
+                }
+
+                if ((int)response.StatusCode == 429 || (int)response.StatusCode >= 500)
+                {
+                    return ProviderUnavailableReply;
+                }
+
+                throw new InvalidOperationException($"AI provider error: {lastError}");
+            }
+
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var json = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            if (TryExtractReply(json.RootElement, out var reply))
+            {
+                return reply;
+            }
+
+            lastError = $"Model {model} returned invalid response format.";
         }
 
-        using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var json = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
-
-        if (TryExtractReply(json.RootElement, out var reply))
+        if (!string.IsNullOrWhiteSpace(lastError) &&
+            (lastError.Contains("(429)", StringComparison.OrdinalIgnoreCase) ||
+             lastError.Contains("(5", StringComparison.OrdinalIgnoreCase)))
         {
-            return reply;
+            return ProviderUnavailableReply;
         }
 
-        throw new InvalidOperationException("AI response format is invalid.");
+        throw new InvalidOperationException(
+            string.IsNullOrWhiteSpace(lastError)
+                ? "AI response format is invalid."
+                : $"AI provider error: {lastError}");
+    }
+
+    private static IReadOnlyList<string> BuildModelCandidates(string? preferredModel)
+    {
+        var unique = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var models = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(preferredModel))
+        {
+            var model = preferredModel.Trim();
+            if (unique.Add(model))
+            {
+                models.Add(model);
+            }
+        }
+
+        foreach (var fallback in FallbackModels)
+        {
+            if (unique.Add(fallback))
+            {
+                models.Add(fallback);
+            }
+        }
+
+        return models;
     }
 
     private static string Truncate(string text, int max)

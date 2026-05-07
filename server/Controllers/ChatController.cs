@@ -2,6 +2,7 @@ using Datsan.Server.Application.Services;
 using Datsan.Server.Core.DTOs;
 using Datsan.Server.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Datsan.Server.Controllers;
 
@@ -54,5 +55,44 @@ public class ChatController : ControllerBase
         }
 
         return Ok(ApiResponse.Success("OK", history));
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("conversations")]
+    public async Task<IActionResult> GetConversations(CancellationToken cancellationToken)
+    {
+        var result = await _chatService.GetAllConversationsAsync(cancellationToken);
+        return Ok(ApiResponse.Success("OK", result));
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("admin-reply")]
+    public async Task<IActionResult> ReplyAsAdmin([FromBody] ChatAdminReplyDto dto, CancellationToken cancellationToken)
+    {
+        await _chatService.ReplyAsAdminAsync(dto.ConversationId, dto.Message, cancellationToken);
+        return Ok(ApiResponse.Success("Gửi phản hồi thành công.", null));
+    }
+
+    [HttpPost("send")]
+    public async Task<IActionResult> SendMessage([FromBody] ChatAskRequestDto dto, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var userId = TryGetUserId();
+            var clientKey = dto.ClientSessionId;
+            var conversationId = await _chatService.SendUserMessageAsync(dto.Message, dto.ConversationId, userId, clientKey, cancellationToken);
+            return Ok(ApiResponse.Success("Gửi tin nhắn thành công.", new { conversationId }));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse.Fail(ex.Message));
+        }
+    }
+
+    private int? TryGetUserId()
+    {
+        if (User?.Identity?.IsAuthenticated != true) return null;
+        var raw = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(raw, out var id) ? id : null;
     }
 }

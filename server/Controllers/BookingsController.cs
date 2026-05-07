@@ -13,8 +13,13 @@ namespace Datsan.Server.Controllers;
 public class BookingsController : ControllerBase
 {
     private readonly BookingService _bookingService;
+    private readonly VnpayService _vnpayService;
 
-    public BookingsController(BookingService bookingService) => _bookingService = bookingService;
+    public BookingsController(BookingService bookingService, VnpayService vnpayService)
+    {
+        _bookingService = bookingService;
+        _vnpayService = vnpayService;
+    }
     
     [HttpGet("available-slots")]
     [AllowAnonymous]
@@ -87,6 +92,49 @@ public class BookingsController : ControllerBase
         {
             return BadRequest(ApiResponse.Fail(ex.Message, null));
         }
+    }
+
+    [HttpPost("{id}/vnpay/create-url")]
+    public async Task<IActionResult> CreateVnpayUrl(
+        int id,
+        [FromBody] VnpayCreatePaymentRequestDto? dto,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var payment = await _vnpayService.CreatePaymentUrlAsync(
+                id,
+                userId,
+                dto?.ClientIp ?? HttpContext.Connection.RemoteIpAddress?.ToString(),
+                dto?.OrderInfo,
+                cancellationToken);
+
+            return Ok(ApiResponse.Success("Tạo URL thanh toán VNPay thành công.", payment));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ApiResponse.Fail(ex.Message, null));
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpGet("vnpay-return")]
+    public async Task<IActionResult> VnpayReturn(CancellationToken cancellationToken)
+    {
+        var result = await _vnpayService.HandleReturnAsync(Request.Query, cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(result.RedirectUrl))
+        {
+            return Redirect(result.RedirectUrl);
+        }
+
+        if (result.Success)
+        {
+            return Ok(ApiResponse.Success(result.Message, result));
+        }
+
+        return BadRequest(ApiResponse.Fail(result.Message, result));
     }
 
     /// <summary>

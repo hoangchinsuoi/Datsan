@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '../common/Button';
 import { AlertTriangle, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CancelModalProps {
   isOpen: boolean;

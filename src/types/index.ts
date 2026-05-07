@@ -13,6 +13,7 @@ export interface Field {
   lighting: string;
   parking: string;
   description: string;
+  maxPlayers?: number;
 }
 
 export interface Booking {
@@ -24,7 +25,7 @@ export interface Booking {
   time: string;
   location: string;
   amount: number;
-  status: "Confirmed" | "Pending" | "Cancelled" | "Completed";
+  status: "Confirmed" | "Pending" | "Paid" | "Cancelled" | "Completed";
   paymentMethod: string;
   userName?: string;
 }
@@ -35,6 +36,7 @@ export interface AuthUser {
   username: string;
   email: string;
   role: string;
+  avatarUrl?: string;
   token: string;
 }
 

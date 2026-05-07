@@ -22,7 +22,7 @@ public static class DbInitializer
             FullName = "Quản trị Datsan",
             Username = "admin",
             Email = "admin@datsan.local",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin"),
             Role = UserRole.Admin,
             IsActive = true,
         };

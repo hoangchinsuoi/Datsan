@@ -1,18 +1,26 @@
 import React from 'react';
-import { Calendar, Clock, MapPin, Ticket, CloudRain, Share2, MessageSquare } from 'lucide-react';
-import { Button } from '../common/Button';
-import { cn } from '../../utils/format';
+import { Calendar, Clock, MapPin, Ticket, CloudRain, Share2 } from 'lucide-react';
+import { cn, formatVnd } from '../../utils/format';
 import { Booking } from '../../types';
-import { formatVnd } from '../../utils/format';
+import { Button } from '../common/Button';
 
 interface MyBookingsListProps {
   bookings: Booking[];
   onViewTicket: (booking: Booking) => void;
   onCancel: (booking: Booking) => void;
   onReview: (booking: Booking) => void;
+  onPayWithVnpay: (booking: Booking) => void;
+  payingBookingId?: string | null;
 }
 
-export const MyBookingsList: React.FC<MyBookingsListProps> = ({ bookings, onViewTicket, onCancel, onReview }) => {
+export const MyBookingsList: React.FC<MyBookingsListProps> = ({
+  bookings,
+  onViewTicket,
+  onCancel,
+  onReview,
+  onPayWithVnpay,
+  payingBookingId,
+}) => {
   return (
     <div className="space-y-6">
       {bookings.map(booking => (
@@ -58,6 +66,15 @@ export const MyBookingsList: React.FC<MyBookingsListProps> = ({ bookings, onView
                 >
                   <Ticket className="w-4 h-4 mr-2" /> Digital Ticket
                 </Button>
+                {booking.status === "Pending" && (
+                  <Button
+                    className="rounded-xl px-6"
+                    onClick={() => onPayWithVnpay(booking)}
+                    disabled={payingBookingId === booking.id}
+                  >
+                    {payingBookingId === booking.id ? "Đang chuyển..." : "Thanh toán VNPay"}
+                  </Button>
+                )}
                 <Button 
                   variant="ghost" 
                   className="text-red-500 hover:bg-red-50 rounded-xl"

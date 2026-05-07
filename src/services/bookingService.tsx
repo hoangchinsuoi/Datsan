@@ -10,6 +10,17 @@ export type CreateBookingPayload = {
   note?: string;
 };
 
+export type CreateVnpayUrlPayload = {
+  clientIp?: string;
+  orderInfo?: string;
+};
+
+export type VnpayPaymentUrlResult = {
+  bookingId: number;
+  txnRef: string;
+  paymentUrl: string;
+};
+
 export const bookingService = {
   async getMyBookings(): Promise<Booking[]> {
     const rows = await apiGet<BookingDto[]>("/bookings");
@@ -37,5 +48,9 @@ export const bookingService = {
 
   async updateBookingStatus(id: string, status: string): Promise<void> {
     await apiPut(`/bookings/${encodeURIComponent(id)}/status`, status);
+  },
+
+  async createVnpayPaymentUrl(bookingId: string, payload?: CreateVnpayUrlPayload): Promise<VnpayPaymentUrlResult> {
+    return apiPost<VnpayPaymentUrlResult>(`/bookings/${encodeURIComponent(bookingId)}/vnpay/create-url`, payload ?? {});
   },
 };
