@@ -1,16 +1,15 @@
-# Build stage
+# Build stage (Context is server/ folder)
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj vA restore
-COPY server/Datsan.Server.csproj ./server/
-RUN dotnet restore server/Datsan.Server.csproj
+# Copy csproj and restore
+COPY Datsan.Server.csproj ./
+RUN dotnet restore Datsan.Server.csproj
 
-# Copy code
+# Copy all files from server/
 COPY . .
 
 # Build
-WORKDIR /src/server
 RUN dotnet publish Datsan.Server.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime
