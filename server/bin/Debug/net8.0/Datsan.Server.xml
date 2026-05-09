@@ -125,5 +125,17 @@
         <member name="P:Datsan.Server.Core.Models.ChatMessage.Role">
             <summary>user hoặc assistant</summary>
         </member>
+        <member name="T:Datsan.Server.Migrations.InitialPostgres">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.InitialPostgres.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.InitialPostgres.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.InitialPostgres.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
     </members>
 </doc>
