@@ -125,53 +125,5 @@
         <member name="P:Datsan.Server.Core.Models.ChatMessage.Role">
             <summary>user hoặc assistant</summary>
         </member>
-        <member name="T:Datsan.Server.Migrations.InitialCreate">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="T:Datsan.Server.Migrations.DecimalPrecision">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.DecimalPrecision.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.DecimalPrecision.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.DecimalPrecision.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="T:Datsan.Server.Migrations.AddChatHistory">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.AddChatHistory.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.AddChatHistory.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.AddChatHistory.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="T:Datsan.Server.Migrations.AddUserAvatarUrl">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.AddUserAvatarUrl.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.AddUserAvatarUrl.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:Datsan.Server.Migrations.AddUserAvatarUrl.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
-        </member>
     </members>
 </doc>

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Datsan.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+39fdcabc683d463cfdbe0cc70b1ab94a2ac09f6b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5ab520f803da62021e1bacf8be9326473313dfeb")]
 [assembly: System.Reflection.AssemblyProductAttribute("Datsan.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Datsan.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
