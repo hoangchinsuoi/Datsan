@@ -1,0 +1,9 @@
+**/.git
+**/bin
+**/obj
+**/out
+**/dist
+node_modules
+.vscode
+.env
+appsettings.Development.json
