@@ -123,4 +123,3 @@ e:\Datsan-main\Datsan-main\server\obj\Debug\net8.0\ref\Datsan.Server.dll
 E:\Datsan-main\Datsan-main\server\bin\Debug\net8.0\dotnet-tools.json
 E:\Datsan-main\Datsan-main\server\bin\Debug\net8.0\Npgsql.dll
 E:\Datsan-main\Datsan-main\server\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
-E:\Datsan-main\Datsan-main\server\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
