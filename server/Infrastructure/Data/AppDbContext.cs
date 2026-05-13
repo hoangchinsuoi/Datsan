@@ -25,9 +25,18 @@ public class AppDbContext : DbContext
             e.HasIndex(u => u.Email).IsUnique();
         });
 
-        modelBuilder.Entity<Field>()
-            .Property(f => f.PricePerHour)
-            .HasPrecision(18, 2);
+        modelBuilder.Entity<Field>(e =>
+        {
+            e.Property(f => f.PricePerHour).HasPrecision(18, 2);
+            e.Property(f => f.Position)
+                .HasConversion<string>()
+                .HasMaxLength(16)
+                .HasDefaultValue(FieldPosition.Front);
+            e.Property(f => f.Format)
+                .HasConversion<string>()
+                .HasMaxLength(16)
+                .HasDefaultValue(PitchFormat.FiveSide);
+        });
 
         modelBuilder.Entity<Booking>()
             .Property(b => b.TotalPrice)

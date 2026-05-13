@@ -23,3 +23,16 @@ public enum UserRole
     Admin,
     Owner
 }
+
+public enum FieldPosition
+{
+    Front, // Sân tiền
+    Back   // Sân sâu
+}
+
+public enum PitchFormat
+{
+    FiveSide,   // Sân 5
+    SevenSide,  // Sân 7
+    ElevenSide  // Sân 11
+}

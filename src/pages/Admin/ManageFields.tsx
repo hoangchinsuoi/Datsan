@@ -109,8 +109,11 @@ const AdminFields: React.FC = () => {
                   <div className="bg-primary text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest">
                     {field.type}
                   </div>
-                  <div className="bg-secondary text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest">
-                    {field.area}
+                  <div className={`text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest ${field.position === 'Front' ? 'bg-amber-500' : 'bg-indigo-600'}`}>
+                    {field.position === 'Front' ? 'Sân tiền' : 'Sân sâu'}
+                  </div>
+                  <div className="bg-emerald-600 text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest">
+                    {field.format === 'ElevenSide' ? 'Sân 11' : field.format === 'SevenSide' ? 'Sân 7' : 'Sân 5'}
                   </div>
                 </div>
               </div>

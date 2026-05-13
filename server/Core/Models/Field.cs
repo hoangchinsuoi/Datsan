@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Datsan.Server.Core.Models;
 
@@ -11,7 +11,11 @@ public class Field
     public decimal PricePerHour { get; set; }
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
+    /// <summary>Comma-separated list of additional gallery image URLs.</summary>
+    public string? GalleryImages { get; set; }
     public FieldStatus Status { get; set; } = FieldStatus.Available;
+    public FieldPosition Position { get; set; } = FieldPosition.Front;
+    public PitchFormat Format { get; set; } = PitchFormat.FiveSide;
     public int MaxPlayers { get; set; } = 10;
 
     public Category? Category { get; set; }

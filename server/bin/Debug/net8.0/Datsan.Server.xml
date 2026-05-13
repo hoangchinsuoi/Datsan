@@ -44,7 +44,7 @@
             Admin: Lấy dữ liệu thống kê Dashboard
             </summary>
         </member>
-        <member name="M:Datsan.Server.Controllers.FieldsController.GetFields(System.String,System.Nullable{System.Int32},System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.Threading.CancellationToken)">
+        <member name="M:Datsan.Server.Controllers.FieldsController.GetFields(System.String,System.String,System.Nullable{System.Int32},System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.String,System.String,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách tất cả sân (có hỗ trợ filter, search)
             </summary>
@@ -117,6 +117,9 @@
         <member name="P:Datsan.Server.Core.DTOs.ChatAskRequestDto.ClientSessionId">
             <summary>GUID phiên ẩn danh từ client; bắt buộc khi chưa đăng nhập.</summary>
         </member>
+        <member name="P:Datsan.Server.Core.DTOs.FieldCreateDto.GalleryImages">
+            <summary>Comma-separated list of gallery image URLs.</summary>
+        </member>
         <member name="P:Datsan.Server.Core.Models.ChatConversation.AnonymousKey">
             <summary>
             Khóa phiên ẩn danh từ client (GUID), bắt buộc khi UserId null.
@@ -124,6 +127,9 @@
         </member>
         <member name="P:Datsan.Server.Core.Models.ChatMessage.Role">
             <summary>user hoặc assistant</summary>
+        </member>
+        <member name="P:Datsan.Server.Core.Models.Field.GalleryImages">
+            <summary>Comma-separated list of additional gallery image URLs.</summary>
         </member>
         <member name="T:Datsan.Server.Migrations.InitialPostgres">
             <inheritdoc />
@@ -135,6 +141,30 @@
             <inheritdoc />
         </member>
         <member name="M:Datsan.Server.Migrations.InitialPostgres.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Datsan.Server.Migrations.AddFieldPosition">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddFieldPosition.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddFieldPosition.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddFieldPosition.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Datsan.Server.Migrations.AddPitchFormat">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddPitchFormat.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddPitchFormat.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Datsan.Server.Migrations.AddPitchFormat.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
     </members>

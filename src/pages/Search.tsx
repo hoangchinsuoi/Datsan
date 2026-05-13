@@ -7,14 +7,14 @@ import { FieldSearch } from "../components/fields/FieldSearch";
 import { useFields } from "../hooks/useFields";
 
 const SearchPage: React.FC = () => {
-  const { fields, loading, error } = useFields();
+  const { fields, loading, error, filters, updateFilters } = useFields();
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [hoveredFieldId, setHoveredFieldId] = useState<string | null>(null);
 
   return (
     <div className="max-w-screen-2xl mx-auto px-8 py-12">
       <div className="flex flex-col md:flex-row gap-8">
-        <FieldFilter />
+        <FieldFilter filters={filters} onFilterChange={updateFilters} fieldCount={fields.length} />
 
         <div className="flex-1 flex flex-col h-full">
           <FieldSearch count={fields.length} viewMode={viewMode} onViewModeChange={setViewMode} />
@@ -30,6 +30,11 @@ const SearchPage: React.FC = () => {
                   exit={{ opacity: 0, y: -20 }}
                   className="grid grid-cols-1 lg:grid-cols-2 gap-8"
                 >
+                  {fields.length === 0 && (
+                    <p className="text-on-surface-variant font-bold col-span-full text-center py-12">
+                      Không tìm thấy sân phù hợp với bộ lọc.
+                    </p>
+                  )}
                   {fields.map((field) => (
                     <FieldCard key={field.id} field={field} />
                   ))}

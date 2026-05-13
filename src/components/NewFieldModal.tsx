@@ -25,6 +25,8 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
   const [pricePerHour, setPricePerHour] = React.useState("");
   const [maxPlayers, setMaxPlayers] = React.useState(10);
   const [imageUrl, setImageUrl] = React.useState("");
+  const [position, setPosition] = React.useState("Front");
+  const [format, setFormat] = React.useState("FiveSide");
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
@@ -45,6 +47,8 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
       setPricePerHour(String(fieldToEdit.price));
       setMaxPlayers(fieldToEdit.maxPlayers || 10);
       setImageUrl(fieldToEdit.image || "");
+      setPosition(fieldToEdit.position || "Front");
+      setFormat(fieldToEdit.format || "FiveSide");
     } else if (isOpen && !fieldToEdit) {
       // Reset form khi mở ở chế độ Thêm mới
       setName("");
@@ -53,6 +57,8 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
       setPricePerHour("");
       setMaxPlayers(10);
       setImageUrl("");
+      setPosition("Front");
+      setFormat("FiveSide");
       setStep(1);
     }
   }, [isOpen, fieldToEdit]);
@@ -105,6 +111,8 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
         description: description.trim() || undefined,
         imageUrl: imageUrl.trim() || null,
         maxPlayers,
+        position,
+        format,
       };
 
       if (fieldToEdit) {
@@ -228,6 +236,46 @@ export const NewFieldModal: React.FC<NewFieldModalProps> = ({ isOpen, onClose, o
                         onChange={(e) => setMaxPlayers(Number(e.target.value) || 10)}
                         className="w-full bg-surface-container-low border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 font-bold"
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant px-1">Field Position</label>
+                      <div className="grid grid-cols-2 gap-4">
+                        {["Front", "Back"].map((p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setPosition(p)}
+                            className={cn(
+                              "py-4 rounded-2xl font-bold text-sm transition-all",
+                              position === p 
+                                ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                                : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"
+                            )}
+                          >
+                            {p === "Front" ? "Sân tiền" : "Sân sâu"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant px-1">Loại sân</label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {[{v:"FiveSide",l:"Sân 5"},{v:"SevenSide",l:"Sân 7"},{v:"ElevenSide",l:"Sân 11"}].map((f) => (
+                          <button
+                            key={f.v}
+                            type="button"
+                            onClick={() => setFormat(f.v)}
+                            className={cn(
+                              "py-4 rounded-2xl font-bold text-sm transition-all",
+                              format === f.v
+                                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
+                                : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high"
+                            )}
+                          >
+                            {f.l}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant px-1">Description</label>

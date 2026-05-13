@@ -17,17 +17,28 @@ public class FieldService
 
     public async Task<IReadOnlyList<FieldDto>> GetAllAsync(
         string? search,
+        string? location,
         int? categoryId,
         decimal? minPrice,
         decimal? maxPrice,
         string? status,
+        string? position,
+        string? format,
         CancellationToken cancellationToken = default)
     {
         FieldStatus? statusFilter = null;
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<FieldStatus>(status, true, out var parsed))
             statusFilter = parsed;
 
-        var list = await _fields.QueryFieldsAsync(search, categoryId, minPrice, maxPrice, statusFilter, cancellationToken);
+        FieldPosition? positionFilter = null;
+        if (!string.IsNullOrWhiteSpace(position) && Enum.TryParse<FieldPosition>(position, true, out var parsedPos))
+            positionFilter = parsedPos;
+
+        PitchFormat? formatFilter = null;
+        if (!string.IsNullOrWhiteSpace(format) && Enum.TryParse<PitchFormat>(format, true, out var parsedFmt))
+            formatFilter = parsedFmt;
+
+        var list = await _fields.QueryFieldsAsync(search, location, categoryId, minPrice, maxPrice, statusFilter, positionFilter, formatFilter, cancellationToken);
         return list.Select(MapToDto).ToList();
     }
 
@@ -42,7 +53,7 @@ public class FieldService
         if (string.IsNullOrWhiteSpace(query))
             return Array.Empty<FieldDto>();
 
-        var list = await _fields.QueryFieldsAsync(query.Trim(), null, null, null, null, cancellationToken);
+        var list = await _fields.QueryFieldsAsync(query.Trim(), null, null, null, null, null, null, null, cancellationToken);
         return list.Select(MapToDto).ToList();
     }
 
@@ -50,6 +61,14 @@ public class FieldService
     {
         if (!await _fields.CategoryExistsAsync(dto.CategoryId, cancellationToken))
             throw new InvalidOperationException("Danh mục không tồn tại.");
+
+        FieldPosition pos = FieldPosition.Front;
+        if (!string.IsNullOrWhiteSpace(dto.Position))
+            Enum.TryParse<FieldPosition>(dto.Position, true, out pos);
+
+        PitchFormat fmt = PitchFormat.FiveSide;
+        if (!string.IsNullOrWhiteSpace(dto.Format))
+            Enum.TryParse<PitchFormat>(dto.Format, true, out fmt);
 
         var field = new Field
         {
@@ -59,8 +78,11 @@ public class FieldService
             PricePerHour = dto.PricePerHour,
             Description = dto.Description,
             ImageUrl = dto.ImageUrl,
+            GalleryImages = dto.GalleryImages,
             MaxPlayers = dto.MaxPlayers,
             Status = FieldStatus.Available,
+            Position = pos,
+            Format = fmt,
         };
 
         _fields.Add(field);
@@ -79,13 +101,24 @@ public class FieldService
         if (!await _fields.CategoryExistsAsync(dto.CategoryId, cancellationToken))
             throw new InvalidOperationException("Danh mục không tồn tại.");
 
+        FieldPosition pos = FieldPosition.Front;
+        if (!string.IsNullOrWhiteSpace(dto.Position))
+            Enum.TryParse<FieldPosition>(dto.Position, true, out pos);
+
+        PitchFormat fmt = PitchFormat.FiveSide;
+        if (!string.IsNullOrWhiteSpace(dto.Format))
+            Enum.TryParse<PitchFormat>(dto.Format, true, out fmt);
+
         field.Name = dto.Name;
         field.CategoryId = dto.CategoryId;
         field.Location = dto.Location;
         field.PricePerHour = dto.PricePerHour;
         field.Description = dto.Description;
         field.ImageUrl = dto.ImageUrl;
+        field.GalleryImages = dto.GalleryImages;
         field.MaxPlayers = dto.MaxPlayers;
+        field.Position = pos;
+        field.Format = fmt;
 
         _fields.Update(field);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -103,10 +136,15 @@ public class FieldService
         _fields.Remove(field);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
-
     private static FieldDto MapToDto(Field f)
     {
         var avg = f.Reviews.Count == 0 ? 0 : f.Reviews.Average(r => (double)r.Rating);
+        var gallery = string.IsNullOrWhiteSpace(f.GalleryImages)
+            ? new List<string>()
+            : f.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                             .Select(u => u.Trim())
+                             .Where(u => !string.IsNullOrEmpty(u))
+                             .ToList();
         return new FieldDto
         {
             Id = f.Id,
@@ -115,11 +153,15 @@ public class FieldService
             Location = f.Location,
             PricePerHour = f.PricePerHour,
             ImageUrl = f.ImageUrl,
+            GalleryImages = gallery,
             Description = f.Description,
             Status = f.Status.ToString(),
+            Position = f.Position.ToString(),
+            Format = f.Format.ToString(),
             MaxPlayers = f.MaxPlayers,
             AverageRating = avg,
             ReviewsCount = f.Reviews.Count,
         };
     }
 }
+

@@ -10,8 +10,11 @@ export type FieldDto = {
   location: string;
   pricePerHour: number;
   imageUrl?: string | null;
+  galleryImages?: string[];
   description?: string | null;
   status: string;
+  position?: string;
+  format?: string;
   maxPlayers: number;
   averageRating: number;
   reviewsCount: number;
@@ -19,6 +22,7 @@ export type FieldDto = {
 
 export function mapFieldDto(dto: FieldDto): Field {
   const rating = dto.averageRating || 0;
+  const mainImage = dto.imageUrl?.trim() || PLACEHOLDER_FIELD_IMAGE;
   return {
     id: String(dto.id),
     name: dto.name,
@@ -26,7 +30,8 @@ export function mapFieldDto(dto: FieldDto): Field {
     price: Number(dto.pricePerHour),
     rating,
     reviewsCount: dto.reviewsCount ?? 0,
-    image: dto.imageUrl?.trim() || PLACEHOLDER_FIELD_IMAGE,
+    image: mainImage,
+    gallery: dto.galleryImages ?? [],
     type: dto.categoryName || 'Natural Grass',
     area: 'Central',
     amenities: ['Floodlights', 'Parking'],
@@ -35,6 +40,10 @@ export function mapFieldDto(dto: FieldDto): Field {
     parking: 'On-site',
     description: dto.description?.trim() || '',
     maxPlayers: dto.maxPlayers,
+    position: (dto.position === 'Back' ? 'Back' : 'Front') as 'Front' | 'Back',
+    format: (['FiveSide', 'SevenSide', 'ElevenSide'].includes(dto.format ?? '')
+      ? dto.format
+      : 'FiveSide') as 'FiveSide' | 'SevenSide' | 'ElevenSide',
   };
 }
 

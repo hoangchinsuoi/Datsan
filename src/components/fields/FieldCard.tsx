@@ -21,12 +21,15 @@ export const FieldCard: React.FC<FieldCardProps> = ({ field }) => {
         </div>
 
         {/* Tags */}
-        <div className="absolute bottom-4 left-4 flex flex-col gap-2">
+        <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
           <div className="bg-primary text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-[0.15em] shadow-lg w-fit">
             {field.type}
           </div>
-          <div className="bg-secondary text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-[0.15em] shadow-lg w-fit">
-            {field.area}
+          <div className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-[0.15em] shadow-lg w-fit ${field.position === 'Front' ? 'bg-amber-500 text-white' : 'bg-indigo-600 text-white'}`}>
+            {field.position === 'Front' ? 'Sân tiền' : 'Sân sâu'}
+          </div>
+          <div className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-[0.15em] shadow-lg w-fit">
+            {field.format === 'ElevenSide' ? 'Sân 11' : field.format === 'SevenSide' ? 'Sân 7' : 'Sân 5'}
           </div>
         </div>
       </div>

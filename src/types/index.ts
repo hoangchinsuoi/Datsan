@@ -6,6 +6,7 @@ export interface Field {
   rating: number;
   reviewsCount: number;
   image: string;
+  gallery: string[];
   type: string;
   area: string;
   amenities: string[];
@@ -14,6 +15,8 @@ export interface Field {
   parking: string;
   description: string;
   maxPlayers?: number;
+  position: 'Front' | 'Back';
+  format: 'FiveSide' | 'SevenSide' | 'ElevenSide';
 }
 
 export interface Booking {

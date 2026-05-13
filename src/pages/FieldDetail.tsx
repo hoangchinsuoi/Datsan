@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Share2, Heart, ChevronRight, Grid, ShieldCheck, Calendar, Clock, X, Maximize2 } from 'lucide-react';
+import { Star, MapPin, Share2, Heart, ChevronRight, Grid, ShieldCheck, Calendar, Clock, X, Maximize2, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { cn, formatVnd } from '../utils/format';
 
@@ -23,6 +23,9 @@ const FieldDetail: React.FC = () => {
   const [loadingSlots, setLoadingSlots] = React.useState(false);
   const [selectedSlot, setSelectedSlot] = React.useState<AvailableSlot | null>(null);
   const [isMapOpen, setIsMapOpen] = React.useState(false);
+  // Gallery lightbox state
+  const [lightboxOpen, setLightboxOpen] = React.useState(false);
+  const [lightboxIndex, setLightboxIndex] = React.useState(0);
 
   React.useEffect(() => {
     if (!id) {
@@ -99,24 +102,64 @@ const FieldDetail: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-8 py-12">
       {/* Gallery Section */}
-      <section className="grid grid-cols-4 grid-rows-2 gap-4 h-[500px] mb-12">
-        <div className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl group">
-          <img src={field.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Main" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        </div>
-        <div className="col-span-1 row-span-1 relative overflow-hidden rounded-3xl group">
-          <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400" className="w-full h-full object-cover" alt="Gallery 1" />
-        </div>
-        <div className="col-span-1 row-span-1 relative overflow-hidden rounded-3xl group">
-          <img src="https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=400" className="w-full h-full object-cover" alt="Gallery 2" />
-        </div>
-        <div className="col-span-2 row-span-1 relative overflow-hidden rounded-3xl group">
-          <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover" alt="Gallery 3" />
-          <div className="absolute bottom-6 right-6 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-on-surface font-semibold flex items-center gap-2 cursor-pointer hover:bg-white transition-colors">
-            <Grid className="w-4 h-4" /> Show all photos
-          </div>
-        </div>
-      </section>
+      {(() => {
+        // Build gallery array: main image + up to 3 extras from field.gallery
+        const FALLBACKS = [
+          'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800',
+          'https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=800',
+          'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=800',
+        ];
+        const extras = field.gallery.length > 0 ? field.gallery.slice(0, 3) : FALLBACKS;
+        const allImages = [field.image, ...extras];
+
+        const openLightbox = (idx: number) => { setLightboxIndex(idx); setLightboxOpen(true); };
+
+        return (
+          <section className="grid grid-cols-4 grid-rows-2 gap-4 h-[500px] mb-12">
+            {/* Main Image */}
+            <div
+              className="col-span-2 row-span-2 relative overflow-hidden rounded-3xl group cursor-zoom-in"
+              onClick={() => openLightbox(0)}
+            >
+              <img src={allImages[0]} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Main" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                <Maximize2 className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </div>
+            {/* Gallery image 1 */}
+            <div
+              className="col-span-1 row-span-1 relative overflow-hidden rounded-3xl group cursor-zoom-in"
+              onClick={() => openLightbox(1)}
+            >
+              <img src={allImages[1]} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Gallery 1" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+            </div>
+            {/* Gallery image 2 */}
+            <div
+              className="col-span-1 row-span-1 relative overflow-hidden rounded-3xl group cursor-zoom-in"
+              onClick={() => openLightbox(2)}
+            >
+              <img src={allImages[2]} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Gallery 2" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+            </div>
+            {/* Gallery image 3 + Show all */}
+            <div
+              className="col-span-2 row-span-1 relative overflow-hidden rounded-3xl group cursor-zoom-in"
+              onClick={() => openLightbox(3)}
+            >
+              <img src={allImages[3] ?? allImages[0]} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Gallery 3" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+              <button
+                onClick={(e) => { e.stopPropagation(); openLightbox(0); }}
+                className="absolute bottom-6 right-6 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full text-on-surface font-semibold flex items-center gap-2 hover:bg-white transition-colors shadow-md"
+              >
+                <Grid className="w-4 h-4" /> Show all photos ({allImages.length})
+              </button>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Header Info */}
       <header className="mb-12">
@@ -308,7 +351,7 @@ const FieldDetail: React.FC = () => {
               </div>
             </div>
 
-            <Link to={`/booking/${field.id}`}>
+            <Link to={`/booking/${field.id}`} state={{ slot: selectedSlot, dateCell: selectedDate }}>
               <Button className="w-full py-5 text-xl mb-4" variant="secondary">Book Now</Button>
             </Link>
 
@@ -348,6 +391,72 @@ const FieldDetail: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Lightbox Modal */}
+      {lightboxOpen && (() => {
+        const FALLBACKS = [
+          'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=800',
+          'https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=800',
+          'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=800',
+        ];
+        const extras = field.gallery.length > 0 ? field.gallery : FALLBACKS;
+        const allImages = [field.image, ...extras];
+        const prev = () => setLightboxIndex(i => (i - 1 + allImages.length) % allImages.length);
+        const next = () => setLightboxIndex(i => (i + 1) % allImages.length);
+        return (
+          <div
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+            onClick={() => setLightboxOpen(false)}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            {/* Prev */}
+            <button
+              onClick={(e) => { e.stopPropagation(); prev(); }}
+              className="absolute left-6 p-3 bg-white/10 hover:bg-white/25 rounded-full text-white transition-colors z-10"
+            >
+              <ChevronLeft className="w-7 h-7" />
+            </button>
+            {/* Image */}
+            <img
+              src={allImages[lightboxIndex]}
+              alt={`Photo ${lightboxIndex + 1}`}
+              className="max-h-[88vh] max-w-[90vw] object-contain rounded-2xl shadow-2xl select-none"
+              onClick={(e) => e.stopPropagation()}
+            />
+            {/* Next */}
+            <button
+              onClick={(e) => { e.stopPropagation(); next(); }}
+              className="absolute right-6 p-3 bg-white/10 hover:bg-white/25 rounded-full text-white transition-colors z-10"
+            >
+              <ChevronRightIcon className="w-7 h-7" />
+            </button>
+            {/* Counter + thumbnails */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
+              <p className="text-white/70 text-sm font-medium">{lightboxIndex + 1} / {allImages.length}</p>
+              <div className="flex gap-2">
+                {allImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx); }}
+                    className={cn(
+                      'w-12 h-8 rounded-lg overflow-hidden border-2 transition-all',
+                      idx === lightboxIndex ? 'border-white scale-110' : 'border-transparent opacity-50 hover:opacity-80'
+                    )}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

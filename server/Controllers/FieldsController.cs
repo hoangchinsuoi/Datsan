@@ -20,15 +20,18 @@ public class FieldsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetFields(
         [FromQuery] string? search,
+        [FromQuery] string? location,
         [FromQuery] int? categoryId,
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
         [FromQuery] string? status,
+        [FromQuery] string? position,
+        [FromQuery] string? format,
         CancellationToken cancellationToken)
     {
         try
         {
-            var fields = await _fieldService.GetAllAsync(search, categoryId, minPrice, maxPrice, status, cancellationToken);
+            var fields = await _fieldService.GetAllAsync(search, location, categoryId, minPrice, maxPrice, status, position, format, cancellationToken);
             return Ok(ApiResponse.Success("Lấy danh sách sân thành công", fields));
         }
         catch (Exception ex)

@@ -17,18 +17,24 @@ export const fieldService = {
   async getFields(
     filters?: Partial<{
       search: string;
+      location: string;
       categoryId: number;
       minPrice: number;
       maxPrice: number;
       status: string;
+      position: string;
+      format: string;
     }>
   ): Promise<Field[]> {
     const q = toQuery({
       search: filters?.search,
+      location: filters?.location,
       categoryId: filters?.categoryId,
       minPrice: filters?.minPrice,
       maxPrice: filters?.maxPrice,
       status: filters?.status,
+      position: filters?.position,
+      format: filters?.format,
     });
     const data = await apiGet<FieldDto[]>(`/fields${q}`);
     return data.map(mapFieldDto);
@@ -56,6 +62,8 @@ export const fieldService = {
     description?: string;
     imageUrl?: string | null;
     maxPlayers: number;
+    position: string;
+    format: string;
   }): Promise<Field> {
     const data = await apiPost<FieldDto>("/fields", body);
     return mapFieldDto(data);
@@ -69,6 +77,8 @@ export const fieldService = {
     description?: string;
     imageUrl?: string | null;
     maxPlayers: number;
+    position: string;
+    format: string;
   }): Promise<Field> {
     const data = await apiPut<FieldDto>(`/fields/${id}`, body);
     return mapFieldDto(data);

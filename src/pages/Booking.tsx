@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../utils/format';
 import { 
   Calendar as CalendarIcon, 
@@ -30,14 +30,17 @@ import { formatVnd } from '../utils/format';
 const BookingPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [field, setField] = React.useState<Field | null>(null);
   const [fieldError, setFieldError] = React.useState<string | null>(null);
   const [bookingError, setBookingError] = React.useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = React.useState<number>(5);
+  // Pre-fill from FieldDetail navigation state if available
+  const navState = location.state as { slot?: AvailableSlot; dateCell?: number } | null;
+  const [selectedDate, setSelectedDate] = React.useState<number>(navState?.dateCell ?? 5);
   const [availableSlots, setAvailableSlots] = React.useState<AvailableSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = React.useState(false);
-  const [selectedSlot, setSelectedSlot] = React.useState<AvailableSlot | null>(null);
+  const [selectedSlot, setSelectedSlot] = React.useState<AvailableSlot | null>(navState?.slot ?? null);
   const [isBooked, setIsBooked] = React.useState(false);
   const [paymentMethod, setPaymentMethod] = React.useState<'card' | 'credits'>('card');
   const [addons, setAddons] = React.useState<{id: string, name: string, price: number}[]>([]);

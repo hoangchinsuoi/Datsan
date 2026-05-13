@@ -33,10 +33,13 @@ public class FieldRepository : IFieldRepository
 
     public async Task<List<Field>> QueryFieldsAsync(
         string? search,
+        string? location,
         int? categoryId,
         decimal? minPrice,
         decimal? maxPrice,
         FieldStatus? status,
+        FieldPosition? position,
+        PitchFormat? format,
         CancellationToken cancellationToken = default)
     {
         var q = _db.Fields
@@ -51,6 +54,12 @@ public class FieldRepository : IFieldRepository
             q = q.Where(f => f.Name.Contains(s) || f.Location.Contains(s));
         }
 
+        if (!string.IsNullOrWhiteSpace(location))
+        {
+            var loc = location.Trim();
+            q = q.Where(f => f.Location.Contains(loc));
+        }
+
         if (categoryId is > 0)
             q = q.Where(f => f.CategoryId == categoryId);
 
@@ -62,6 +71,12 @@ public class FieldRepository : IFieldRepository
 
         if (status is { } st)
             q = q.Where(f => f.Status == st);
+
+        if (position is { } pos)
+            q = q.Where(f => f.Position == pos);
+
+        if (format is { } fmt)
+            q = q.Where(f => f.Format == fmt);
 
         return await q.ToListAsync(cancellationToken);
     }
