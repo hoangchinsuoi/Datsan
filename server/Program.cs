@@ -90,12 +90,16 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            policy.WithOrigins(
-                    "http://localhost:3000",
-                    "https://localhost:3000",
-                    "http://127.0.0.1:3000")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
+            // Đọc danh sách origins từ biến môi trường FRONTEND_URL (set trên Render)
+            var frontendUrl = builder.Configuration["FRONTEND_URL"] 
+                              ?? Environment.GetEnvironmentVariable("FRONTEND_URL")
+                              ?? "http://localhost:3000";
+            
+            var allowedOrigins = frontendUrl.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
         }
     });
 });
@@ -133,11 +137,29 @@ builder.Services.AddHttpClient<AiChatService>();
 
 var app = builder.Build();
 
+// Retry migration để tránh lỗi khi database chưa sẵn sàng (race condition trên Render)
 using (var scope = app.Services.CreateScope())
 {
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
-    await DbInitializer.SeedAsync(db);
+    
+    const int maxRetries = 5;
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        try
+        {
+            logger.LogInformation("Đang chạy database migration (lần {Attempt}/{MaxRetries})...", attempt, maxRetries);
+            await db.Database.MigrateAsync();
+            await DbInitializer.SeedAsync(db);
+            logger.LogInformation("Migration và Seed dữ liệu thành công.");
+            break;
+        }
+        catch (Exception ex) when (attempt < maxRetries)
+        {
+            logger.LogWarning(ex, "Migration thất bại lần {Attempt}, thử lại sau 5 giây...", attempt);
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
+    }
 }
 
 if (app.Environment.IsDevelopment())
