@@ -110,15 +110,23 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Hỗ trợ tự động parse định dạng postgresql:// từ Render một cách an toàn hơn
 if (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://"))
 {
-    var uri = new Uri(connectionString);
-    var db = uri.AbsolutePath.TrimStart('/');
-    var userPass = uri.UserInfo.Split(':');
-    var user = userPass[0];
-    var pass = userPass.Length > 1 ? Uri.UnescapeDataString(userPass[1]) : "";
-    var host = uri.Host;
-    var port = uri.Port > 0 ? uri.Port : 5432;
-    
-    connectionString = $"Host={host};Port={port};Database={db};Username={user};Password={pass};SSL Mode=Prefer;Trust Server Certificate=true;Include Error Detail=true";
+    try 
+    {
+        var uri = new Uri(connectionString);
+        var db = uri.AbsolutePath.TrimStart('/');
+        var userPass = uri.UserInfo.Split(':');
+        var user = userPass[0];
+        var pass = userPass.Length > 1 ? Uri.UnescapeDataString(userPass[1]) : "";
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        
+        connectionString = $"Host={host};Port={port};Database={db};Username={user};Password={pass};SSL Mode=Prefer;Trust Server Certificate=true;Include Error Detail=true";
+        Console.WriteLine($"[Database] Đang kết nối tới host: {host}:{port}, Database: {db}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Database] Lỗi khi parse connection string: {ex.Message}");
+    }
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>

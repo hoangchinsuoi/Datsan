@@ -6,7 +6,8 @@ export type ApiEnvelope<T> = {
   data: T;
 };
 
-const baseURL = "/api";
+// Lấy base URL từ biến môi trường (cho Production trên Render) hoặc mặc định là /api
+const baseURL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const api = axios.create({
   baseURL,
