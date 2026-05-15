@@ -48,6 +48,9 @@ public class OpenAiChatService : IAiChatBackend
         }
 
         var model = _configuration["Ai:OpenAiModel"]?.Trim() ?? "gpt-4o-mini";
+        var baseUrl = _configuration["Ai:OpenAiBaseUrl"]?.Trim() ?? "https://api.openai.com/v1";
+        if (baseUrl.EndsWith("/")) baseUrl = baseUrl.TrimEnd('/');
+        
         var maxPart = _configuration.GetValue("Ai:MaxGeminiPartLength", 2000);
 
         var messages = new List<object>
@@ -71,7 +74,8 @@ public class OpenAiChatService : IAiChatBackend
             max_tokens = 600,
         };
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
+        var requestUrl = $"{baseUrl}/chat/completions";
+        using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey.Trim());
         request.Content = JsonContent.Create(payload);
 
@@ -83,10 +87,12 @@ public class OpenAiChatService : IAiChatBackend
 
             if ((int)response.StatusCode == 429 || (int)response.StatusCode >= 500)
             {
+                var bodyTrim = errorBody.Length > 900 ? errorBody[..900] + "…" : errorBody;
                 _logger.LogWarning(
-                    "OpenAI returned {Status} for model {Model}. User sees generic overload message.",
+                    "OpenAI returned {Status} for model {Model}. Response (trimmed): {Body}",
                     (int)response.StatusCode,
-                    model);
+                    model,
+                    bodyTrim);
                 return ProviderUnavailableReply;
             }
 

@@ -56,6 +56,7 @@ export const ChatWidget: React.FC = () => {
       return;
     }
 
+    let cancelled = false;
     const stored = getStoredConversationId();
     setConversationId(stored);
     if (!stored) {
@@ -117,12 +118,15 @@ export const ChatWidget: React.FC = () => {
         setStoredConversationId(result.conversationId);
         setConversationId(result.conversationId);
       }
-    } catch {
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : String(e);
+      const hint =
+        raw.length > 480 ? `${raw.slice(0, 480)}…` : raw || "Lỗi không xác định.";
       setMessages((prev) => [
         ...prev,
         createMessage(
           "bot",
-          "Hiện chưa thể kết nối AI. Bạn kiểm tra lại backend hoặc cấu hình API key rồi thử lại nhé."
+          `Không gửi được tin: ${hint} Nếu là cấu hình API, kiểm tra Render (Ai__Provider, key) và log server.`
         ),
       ]);
     } finally {

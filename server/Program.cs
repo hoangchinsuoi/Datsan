@@ -226,10 +226,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-if (!app.Environment.IsDevelopment())
+// Render (và nhiều PaaS) chấm SSL ở proxy; trong container chỉ có HTTP — bật redirect HTTPS gây cảnh báo và có thể gây lỗi.
+var runningOnRender = string.Equals(Environment.GetEnvironmentVariable("RENDER"), "true", StringComparison.OrdinalIgnoreCase);
+if (!app.Environment.IsDevelopment() && !runningOnRender)
 {
     app.UseHttpsRedirection();
 }
+
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();

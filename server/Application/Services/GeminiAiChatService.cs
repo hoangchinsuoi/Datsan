@@ -92,10 +92,12 @@ public class GeminiAiChatService : IAiChatBackend
 
                 if ((int)response.StatusCode == 429 || (int)response.StatusCode >= 500)
                 {
+                    var bodyTrim = errorBody.Length > 900 ? errorBody[..900] + "…" : errorBody;
                     _logger.LogWarning(
-                        "Gemini generateContent returned {Status} for model {Model}. User sees generic overload message.",
+                        "Gemini generateContent returned {Status} for model {Model}. Response (trimmed): {Body}",
                         (int)response.StatusCode,
-                        model);
+                        model,
+                        bodyTrim);
                     return ProviderUnavailableReply;
                 }
 
