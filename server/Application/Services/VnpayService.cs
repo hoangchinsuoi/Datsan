@@ -67,7 +67,7 @@ public class VnpayService
             ["vnp_IpAddr"] = NormalizeIp(clientIp),
             ["vnp_Locale"] = "vn",
             ["vnp_OrderInfo"] = BuildOrderInfo(booking.Id, orderInfo),
-            ["vnp_OrderType"] = "other",
+            ["vnp_OrderType"] = "190000",
             ["vnp_ReturnUrl"] = returnUrl,
             ["vnp_TxnRef"] = txnRef
         };
@@ -80,6 +80,8 @@ public class VnpayService
         var rawData = BuildRawQueryString(requestData);
         var secureHash = HmacSha512(hashSecret, rawData);
         var paymentUrl = $"{paymentBaseUrl}?{BuildEncodedQueryString(requestData)}&vnp_SecureHash={secureHash}";
+        
+        Console.WriteLine($"[VNPAY] Generated URL: {paymentUrl}");
 
         return new VnpayPaymentUrlDto
         {
