@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\Datsan-main\\Datsan-main\\server\\Datsan.Server.csproj": {}
+    "e:\\Datsan-main\\Datsan-main\\server\\Datsan.Server.csproj": {}
   },
   "projects": {
-    "E:\\Datsan-main\\Datsan-main\\server\\Datsan.Server.csproj": {
+    "e:\\Datsan-main\\Datsan-main\\server\\Datsan.Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Datsan-main\\Datsan-main\\server\\Datsan.Server.csproj",
+        "projectUniqueName": "e:\\Datsan-main\\Datsan-main\\server\\Datsan.Server.csproj",
         "projectName": "Datsan.Server",
-        "projectPath": "E:\\Datsan-main\\Datsan-main\\server\\Datsan.Server.csproj",
+        "projectPath": "e:\\Datsan-main\\Datsan-main\\server\\Datsan.Server.csproj",
         "packagesPath": "C:\\Users\\hoang\\.nuget\\packages\\",
-        "outputPath": "E:\\Datsan-main\\Datsan-main\\server\\obj\\",
+        "outputPath": "e:\\Datsan-main\\Datsan-main\\server\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

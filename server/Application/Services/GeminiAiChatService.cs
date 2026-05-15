@@ -1,9 +1,11 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Datsan.Server.Application.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Datsan.Server.Application.Services;
 
-public class AiChatService
+public class GeminiAiChatService : IAiChatBackend
 {
     private static readonly string[] FallbackModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
     private const string ProviderUnavailableReply =
@@ -19,11 +21,13 @@ public class AiChatService
 
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<GeminiAiChatService> _logger;
 
-    public AiChatService(HttpClient httpClient, IConfiguration configuration)
+    public GeminiAiChatService(HttpClient httpClient, IConfiguration configuration, ILogger<GeminiAiChatService> logger)
     {
         _httpClient = httpClient;
         _configuration = configuration;
+        _logger = logger;
     }
 
     public async Task<string> AskWithHistoryAsync(
@@ -81,7 +85,6 @@ public class AiChatService
                 var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
                 lastError = $"Model {model} failed ({(int)response.StatusCode}): {errorBody}";
 
-                // Retry with next model only when model/path is unavailable.
                 if ((int)response.StatusCode == 404)
                 {
                     continue;
@@ -89,9 +92,14 @@ public class AiChatService
 
                 if ((int)response.StatusCode == 429 || (int)response.StatusCode >= 500)
                 {
+                    _logger.LogWarning(
+                        "Gemini generateContent returned {Status} for model {Model}. User sees generic overload message.",
+                        (int)response.StatusCode,
+                        model);
                     return ProviderUnavailableReply;
                 }
 
+                _logger.LogWarning("Gemini generateContent failed for model {Model}: {Detail}", model, lastError);
                 throw new InvalidOperationException($"AI provider error: {lastError}");
             }
 

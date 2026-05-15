@@ -147,7 +147,19 @@ builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<VnpayService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.AddHttpClient<AiChatService>();
+builder.Services.AddHttpClient<GeminiAiChatService>();
+builder.Services.AddHttpClient<OpenAiChatService>();
+builder.Services.AddScoped<IAiChatBackend>(sp =>
+{
+    var cfg = sp.GetRequiredService<IConfiguration>();
+    var provider = cfg["Ai:Provider"]?.Trim() ?? "Gemini";
+    if (string.Equals(provider, "OpenAI", StringComparison.OrdinalIgnoreCase))
+    {
+        return sp.GetRequiredService<OpenAiChatService>();
+    }
+
+    return sp.GetRequiredService<GeminiAiChatService>();
+});
 
 var app = builder.Build();
 
@@ -155,6 +167,21 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
+    var cfgStartup = services.GetRequiredService<IConfiguration>();
+    var providerRaw = cfgStartup["Ai:Provider"];
+    var providerNorm = providerRaw?.Trim() ?? "Gemini";
+    var useOpenAi = string.Equals(providerNorm, "OpenAI", StringComparison.OrdinalIgnoreCase);
+    var hasOpenKey = !string.IsNullOrWhiteSpace(
+        cfgStartup["Ai:OpenAiApiKey"] ?? Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+    var hasGeminiKey = !string.IsNullOrWhiteSpace(
+        cfgStartup["Ai:GeminiApiKey"] ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY"));
+    logger.LogInformation(
+        "[AI] Ai:Provider={ProviderRaw} → backend {Backend}. OpenAI key configured: {OpenOk}. Gemini key configured: {GemOk}.",
+        string.IsNullOrWhiteSpace(providerRaw) ? "(empty, default Gemini)" : providerRaw,
+        useOpenAi ? "OpenAI" : "Gemini",
+        hasOpenKey,
+        hasGeminiKey);
+
     var db = services.GetRequiredService<AppDbContext>();
     
     // Tăng thời gian chờ và số lần thử lại cho môi trường Render
@@ -183,7 +210,7 @@ using (var scope = app.Services.CreateScope())
             logger.LogWarning(ex, "Migration thất bại lần {Attempt}, thử lại sau 5 giây...", attempt);
             if (attempt == maxRetries)
             {
-                logger.LogError(ex, "Migration thất bại hoàn toàn sau {MaxRetries} lần thử. App vẫn sẽ cố gắng khởi động.");
+                logger.LogError(ex, "Migration thất bại hoàn toàn sau {MaxRetries} lần thử. App vẫn sẽ cố gắng khởi động.", maxRetries);
             }
             else
             {

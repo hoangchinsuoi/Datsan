@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.RegularExpressions;
+using Datsan.Server.Application.Abstractions;
 using Datsan.Server.Core.DTOs;
 using Datsan.Server.Core.Models;
 using Datsan.Server.Infrastructure.Data;
@@ -14,10 +15,10 @@ public class ChatService
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     private readonly AppDbContext _db;
-    private readonly AiChatService _aiChat;
+    private readonly IAiChatBackend _aiChat;
     private readonly IConfiguration _configuration;
 
-    public ChatService(AppDbContext db, AiChatService aiChat, IConfiguration configuration)
+    public ChatService(AppDbContext db, IAiChatBackend aiChat, IConfiguration configuration)
     {
         _db = db;
         _aiChat = aiChat;

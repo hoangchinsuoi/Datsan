@@ -4,6 +4,9 @@
         <name>Datsan.Server</name>
     </assembly>
     <members>
+        <member name="T:Datsan.Server.Application.Services.OpenAiChatService">
+            <summary>OpenAI Chat Completions — chọn bằng Ai:Provider = OpenAI (hoặc biến môi trường Ai__Provider).</summary>
+        </member>
         <member name="M:Datsan.Server.Controllers.AuthController.Register(Datsan.Server.Core.DTOs.RegisterDto,System.Threading.CancellationToken)">
             <summary>
             Đăng ký tài khoản mới
