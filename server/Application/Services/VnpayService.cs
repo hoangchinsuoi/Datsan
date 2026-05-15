@@ -36,6 +36,7 @@ public class VnpayService
         string? orderInfo,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogWarning("[VNPAY] Bắt đầu tạo URL thanh toán cho Booking ID: {BookingId}", bookingId);
         var booking = await _bookings.GetByIdAsync(bookingId, cancellationToken);
         if (booking is null || booking.UserId != userId)
         {
@@ -86,7 +87,7 @@ public class VnpayService
         var secureHash = HmacSha512(hashSecret, rawData);
         var paymentUrl = $"{paymentBaseUrl}?{BuildEncodedQueryString(requestData)}&vnp_SecureHash={secureHash}";
         
-        _logger.LogInformation("VNPAY URL: {Url}", paymentUrl);
+        _logger.LogWarning("[VNPAY] URL THANH TOAN: {Url}", paymentUrl);
 
         return new VnpayPaymentUrlDto
         {
