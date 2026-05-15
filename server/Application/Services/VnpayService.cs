@@ -242,21 +242,13 @@ public class VnpayService
     private static string BuildRawQueryString(IReadOnlyDictionary<string, string> data) =>
         string.Join("&", data
             .Where(p => !string.IsNullOrWhiteSpace(p.Value))
-            .Select(p => $"{p.Key}={p.Value}"));
+            .Select(p => $"{WebUtility.UrlEncode(p.Key)}={WebUtility.UrlEncode(p.Value)}"));
 
     private static string BuildEncodedQueryString(IReadOnlyDictionary<string, string> data) =>
-        string.Join("&", data.Select(p => $"{WebUtility.UrlEncode(p.Key)}={WebUtility.UrlEncode(p.Value)}"));
+        BuildRawQueryString(data);
 
     private static string HmacSha512(string key, string input)
     {
-        if (key.Length == 32)
-        {
-            // Tài khoản cũ dùng MD5
-            using var md5 = MD5.Create();
-            var hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(key + input));
-            return Convert.ToHexString(hashBytes).ToUpperInvariant();
-        }
-
         var keyBytes = Encoding.UTF8.GetBytes(key);
         var inputBytes = Encoding.UTF8.GetBytes(input);
         using var hmac = new HMACSHA512(keyBytes);
