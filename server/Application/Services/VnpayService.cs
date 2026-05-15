@@ -74,7 +74,8 @@ public class VnpayService
             ["vnp_OrderInfo"] = BuildOrderInfo(booking.Id, orderInfo),
             ["vnp_OrderType"] = "200000",
             ["vnp_ReturnUrl"] = returnUrl,
-            ["vnp_TxnRef"] = txnRef
+            ["vnp_TxnRef"] = txnRef,
+            ["vnp_SecureHashType"] = "HMACSHA512"
         };
         var bankCode = _configuration["Vnpay:BankCode"];
         if (!string.IsNullOrWhiteSpace(bankCode))
@@ -210,7 +211,7 @@ public class VnpayService
             return orderInfo.Trim();
         }
 
-        return $"Thanh toan dat san {bookingId}";
+        return $"ThanhToanDatSan{bookingId}";
     }
 
     private static string NormalizeIp(string? clientIp)
@@ -235,7 +236,9 @@ public class VnpayService
     }
 
     private static string BuildRawQueryString(IReadOnlyDictionary<string, string> data) =>
-        string.Join("&", data.Select(p => $"{p.Key}={p.Value}"));
+        string.Join("&", data
+            .Where(p => !string.IsNullOrWhiteSpace(p.Value))
+            .Select(p => $"{p.Key}={p.Value}"));
 
     private static string BuildEncodedQueryString(IReadOnlyDictionary<string, string> data) =>
         string.Join("&", data.Select(p => $"{WebUtility.UrlEncode(p.Key)}={WebUtility.UrlEncode(p.Value)}"));
