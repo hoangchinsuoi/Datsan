@@ -84,18 +84,9 @@ public class VnpayService
 
         var rawData = BuildRawQueryString(requestData);
         var secureHash = HmacSha512(hashSecret, rawData);
-        
-        _logger.LogWarning("[VNPAY] --- START PARAMETERS ---");
-        foreach (var kvp in requestData)
-        {
-            _logger.LogWarning("[VNPAY] {Key} = {Value}", kvp.Key, kvp.Value);
-        }
-        _logger.LogWarning("[VNPAY] SecureHash = {Hash}", secureHash);
-        _logger.LogWarning("[VNPAY] --- END PARAMETERS ---");
-
         var paymentUrl = $"{paymentBaseUrl}?{BuildEncodedQueryString(requestData)}&vnp_SecureHash={secureHash}";
         
-        _logger.LogWarning("[VNPAY] FINAL URL: {Url}", paymentUrl);
+        _logger.LogInformation("VNPAY URL Generated for Booking {BookingId}", booking.Id);
 
         return new VnpayPaymentUrlDto
         {
