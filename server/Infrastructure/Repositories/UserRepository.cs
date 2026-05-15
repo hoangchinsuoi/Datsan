@@ -17,10 +17,13 @@ public class UserRepository : IUserRepository
     public Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
         _db.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
-    public Task<User?> FindByUsernameOrEmailAsync(string usernameOrEmail, CancellationToken cancellationToken = default) =>
-        _db.Users.AsNoTracking().FirstOrDefaultAsync(
-            u => u.Username == usernameOrEmail || u.Email == usernameOrEmail,
+    public Task<User?> FindByUsernameOrEmailAsync(string usernameOrEmail, CancellationToken cancellationToken = default)
+    {
+        var normalized = usernameOrEmail.ToLower();
+        return _db.Users.AsNoTracking().FirstOrDefaultAsync(
+            u => u.Username.ToLower() == normalized || u.Email.ToLower() == normalized,
             cancellationToken);
+    }
 
     public Task<bool> UsernameOrEmailTakenAsync(string username, string email, CancellationToken cancellationToken = default) =>
         _db.Users.AnyAsync(u => u.Username == username || u.Email == email, cancellationToken);

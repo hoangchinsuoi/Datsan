@@ -7,15 +7,18 @@ public static class DbInitializer
 {
     public static async Task SeedAsync(AppDbContext db, CancellationToken cancellationToken = default)
     {
-        if (await db.Categories.AnyAsync(cancellationToken))
+        if (await db.Users.AnyAsync(u => u.Username == "admin", cancellationToken))
             return;
 
-        db.Categories.AddRange(
-            new Category { Name = "Bóng đá", Description = "Sân cỏ / sân 11 người" },
-            new Category { Name = "Futsal", Description = "Sân trong nhà / 5 người" },
-            new Category { Name = "Pickleball", Description = "Sân pickleball" });
+        if (!await db.Categories.AnyAsync(cancellationToken))
+        {
+            db.Categories.AddRange(
+                new Category { Name = "Bóng đá", Description = "Sân cỏ / sân 11 người" },
+                new Category { Name = "Futsal", Description = "Sân trong nhà / 5 người" },
+                new Category { Name = "Pickleball", Description = "Sân pickleball" });
 
-        await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+        }
 
         var admin = new User
         {
