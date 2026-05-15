@@ -76,9 +76,9 @@ public class VnpayService
             requestData["vnp_BankCode"] = bankCode.Trim();
         }
 
-        var queryString = BuildQueryString(requestData);
-        var secureHash = HmacSha512(hashSecret, queryString);
-        var paymentUrl = $"{paymentBaseUrl}?{queryString}&vnp_SecureHash={secureHash}";
+        var rawData = BuildRawQueryString(requestData);
+        var secureHash = HmacSha512(hashSecret, rawData);
+        var paymentUrl = $"{paymentBaseUrl}?{BuildEncodedQueryString(requestData)}&vnp_SecureHash={secureHash}";
 
         return new VnpayPaymentUrlDto
         {
@@ -116,7 +116,7 @@ public class VnpayService
 
         queryPairs.Remove("vnp_SecureHashType");
         queryPairs.Remove("vnp_SecureHash");
-        var canonical = BuildQueryString(new SortedDictionary<string, string>(
+        var canonical = BuildRawQueryString(new SortedDictionary<string, string>(
             queryPairs.Where(p => !string.IsNullOrWhiteSpace(p.Value))
                 .ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal),
             StringComparer.Ordinal));
@@ -226,7 +226,10 @@ public class VnpayService
         return raw;
     }
 
-    private static string BuildQueryString(IReadOnlyDictionary<string, string> data) =>
+    private static string BuildRawQueryString(IReadOnlyDictionary<string, string> data) =>
+        string.Join("&", data.Select(p => $"{p.Key}={p.Value}"));
+
+    private static string BuildEncodedQueryString(IReadOnlyDictionary<string, string> data) =>
         string.Join("&", data.Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
 
     private static string HmacSha512(string key, string input)
