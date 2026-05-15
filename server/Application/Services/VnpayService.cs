@@ -74,8 +74,7 @@ public class VnpayService
             ["vnp_OrderInfo"] = BuildOrderInfo(booking.Id, orderInfo),
             ["vnp_OrderType"] = "200000",
             ["vnp_ReturnUrl"] = returnUrl,
-            ["vnp_TxnRef"] = txnRef,
-            ["vnp_SecureHashType"] = "HMACSHA512"
+            ["vnp_TxnRef"] = txnRef
         };
         var bankCode = _configuration["Vnpay:BankCode"];
         if (!string.IsNullOrWhiteSpace(bankCode))
@@ -250,6 +249,14 @@ public class VnpayService
 
     private static string HmacSha512(string key, string input)
     {
+        if (key.Length == 32)
+        {
+            // Tài khoản cũ dùng MD5
+            using var md5 = MD5.Create();
+            var hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(key + input));
+            return Convert.ToHexString(hashBytes).ToUpperInvariant();
+        }
+
         var keyBytes = Encoding.UTF8.GetBytes(key);
         var inputBytes = Encoding.UTF8.GetBytes(input);
         using var hmac = new HMACSHA512(keyBytes);
