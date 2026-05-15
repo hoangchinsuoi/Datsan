@@ -7,6 +7,9 @@
         <member name="T:Datsan.Server.Application.Services.OpenAiChatService">
             <summary>OpenAI Chat Completions — chọn bằng Ai:Provider = OpenAI (hoặc biến môi trường Ai__Provider).</summary>
         </member>
+        <member name="M:Datsan.Server.Application.Services.OpenAiChatService.ShouldTryNextModel(System.Int32,System.String)">
+            <summary>404 hoặc 400 model_not_found — thử model khác.</summary>
+        </member>
         <member name="M:Datsan.Server.Controllers.AuthController.Register(Datsan.Server.Core.DTOs.RegisterDto,System.Threading.CancellationToken)">
             <summary>
             Đăng ký tài khoản mới
