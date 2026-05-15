@@ -83,7 +83,12 @@ public class VnpayService
             requestData["vnp_BankCode"] = bankCode.Trim();
         }
 
-        var rawData = BuildRawQueryString(requestData);
+        // Tạo chuỗi băm (Lưu ý: Loại bỏ vnp_SecureHashType và vnp_SecureHash)
+        var hashData = requestData
+            .Where(p => p.Key != "vnp_SecureHash" && p.Key != "vnp_SecureHashType" && !string.IsNullOrWhiteSpace(p.Value))
+            .ToDictionary(p => p.Key, p => p.Value);
+            
+        var rawData = BuildRawQueryString(new SortedDictionary<string, string>(hashData, StringComparer.Ordinal));
         var secureHash = HmacSha512(hashSecret, rawData);
         var paymentUrl = $"{paymentBaseUrl}?{BuildEncodedQueryString(requestData)}&vnp_SecureHash={secureHash}";
         
