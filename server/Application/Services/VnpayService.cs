@@ -72,7 +72,7 @@ public class VnpayService
             ["vnp_IpAddr"] = NormalizeIp(clientIp),
             ["vnp_Locale"] = "vn",
             ["vnp_OrderInfo"] = BuildOrderInfo(booking.Id, orderInfo),
-            ["vnp_OrderType"] = "190000",
+            ["vnp_OrderType"] = "other",
             ["vnp_ReturnUrl"] = returnUrl,
             ["vnp_TxnRef"] = txnRef
         };
@@ -80,10 +80,6 @@ public class VnpayService
         if (!string.IsNullOrWhiteSpace(bankCode))
         {
             requestData["vnp_BankCode"] = bankCode.Trim();
-        }
-        else
-        {
-            requestData["vnp_BankCode"] = "NCB"; // Mặc định dùng NCB để test trên Sandbox
         }
 
         // Tạo chuỗi băm (Lưu ý: Loại bỏ vnp_SecureHashType và vnp_SecureHash)
