@@ -184,43 +184,59 @@ public class ChatService
     {
         if (conversationId is null)
         {
-            var created = new ChatConversation
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                AnonymousKey = userId is null ? clientKey : null,
-                CreatedAt = DateTime.UtcNow,
-            };
-            _db.ChatConversations.Add(created);
-            await _db.SaveChangesAsync(cancellationToken);
-            return created;
+            return await CreateNewConversation(userId, clientKey, cancellationToken);
         }
 
         var existing = await _db.ChatConversations
             .FirstOrDefaultAsync(c => c.Id == conversationId.Value, cancellationToken);
-        if (existing is null)
+            
+        // Nếu không tìm thấy hoặc không có quyền -> Tự động tạo cuộc trò chuyện mới để người dùng tiếp tục chat được ngay
+        if (existing is null || !CanAccessConversation(existing, userId, clientKey))
         {
-            throw new ArgumentException("Cuộc trò chuyện không tồn tại.");
+            return await CreateNewConversation(userId, clientKey, cancellationToken);
         }
 
-        if (!CanAccessConversation(existing, userId, clientKey))
+        // Nếu cuộc trò chuyện cũ chưa có User (ẩn danh) mà nay User đã đăng nhập -> Gán User vào luôn
+        if (existing.UserId == null && userId != null)
         {
-            throw new UnauthorizedAccessException("Không có quyền truy cập cuộc trò chuyện này.");
+            existing.UserId = userId;
+            await _db.SaveChangesAsync(cancellationToken);
         }
 
         return existing;
     }
 
+    private async Task<ChatConversation> CreateNewConversation(int? userId, string? clientKey, CancellationToken cancellationToken)
+    {
+        var created = new ChatConversation
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            AnonymousKey = userId is null ? clientKey : null,
+            CreatedAt = DateTime.UtcNow,
+        };
+        _db.ChatConversations.Add(created);
+        await _db.SaveChangesAsync(cancellationToken);
+        return created;
+    }
+
     private static bool CanAccessConversation(ChatConversation conv, int? userId, string? clientKey)
     {
+        // 1. Nếu là Admin thì luôn có quyền (tùy chọn)
+        
+        // 2. Nếu cuộc trò chuyện thuộc về một User cụ thể
         if (conv.UserId is int ownerId)
         {
             return userId == ownerId;
         }
 
-        return !string.IsNullOrEmpty(conv.AnonymousKey)
-               && !string.IsNullOrEmpty(clientKey)
-               && string.Equals(conv.AnonymousKey, clientKey, StringComparison.Ordinal);
+        // 3. Nếu là cuộc trò chuyện ẩn danh, kiểm tra clientKey
+        if (!string.IsNullOrEmpty(conv.AnonymousKey))
+        {
+            return string.Equals(conv.AnonymousKey, clientKey, StringComparison.Ordinal);
+        }
+
+        return true;
     }
 
     private static int? TryGetUserId(ClaimsPrincipal? user)
