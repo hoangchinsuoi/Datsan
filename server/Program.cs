@@ -107,12 +107,18 @@ builder.Services.AddCors(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// Hỗ trợ tự động parse định dạng postgresql:// từ Render
+// Hỗ trợ tự động parse định dạng postgresql:// từ Render một cách an toàn hơn
 if (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://"))
 {
-    var databaseUri = new Uri(connectionString);
-    var userInfo = databaseUri.UserInfo.Split(':');
-    connectionString = $"Host={databaseUri.Host};Port={databaseUri.Port};Database={databaseUri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+    var uri = new Uri(connectionString);
+    var db = uri.AbsolutePath.TrimStart('/');
+    var userPass = uri.UserInfo.Split(':');
+    var user = userPass[0];
+    var pass = userPass.Length > 1 ? Uri.UnescapeDataString(userPass[1]) : "";
+    var host = uri.Host;
+    var port = uri.Port > 0 ? uri.Port : 5432;
+    
+    connectionString = $"Host={host};Port={port};Database={db};Username={user};Password={pass};SSL Mode=Prefer;Trust Server Certificate=true;Include Error Detail=true";
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -137,7 +143,8 @@ builder.Services.AddHttpClient<AiChatService>();
 
 var app = builder.Build();
 
-// Retry migration để tránh lỗi khi database chưa sẵn sàng (race condition trên Render)
+// TẠM THỜI TẮT MIGRATION TỰ ĐỘNG ĐỂ TRÁNH CRASH (STATUS 139) TRÊN RENDER
+/*
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -161,6 +168,7 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+*/
 
 if (app.Environment.IsDevelopment())
 {
