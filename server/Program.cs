@@ -143,32 +143,47 @@ builder.Services.AddHttpClient<AiChatService>();
 
 var app = builder.Build();
 
-// TẠM THỜI TẮT MIGRATION TỰ ĐỘNG ĐỂ TRÁNH CRASH (STATUS 139) TRÊN RENDER
-/*
 using (var scope = app.Services.CreateScope())
 {
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var db = services.GetRequiredService<AppDbContext>();
     
+    // Tăng thời gian chờ và số lần thử lại cho môi trường Render
     const int maxRetries = 5;
     for (int attempt = 1; attempt <= maxRetries; attempt++)
     {
         try
         {
-            logger.LogInformation("Đang chạy database migration (lần {Attempt}/{MaxRetries})...", attempt, maxRetries);
-            await db.Database.MigrateAsync();
-            await DbInitializer.SeedAsync(db);
-            logger.LogInformation("Migration và Seed dữ liệu thành công.");
-            break;
+            logger.LogInformation("Đang kiểm tra và chạy database migration (lần {Attempt}/{MaxRetries})...", attempt, maxRetries);
+            
+            // Đảm bảo có thể kết nối trước khi chạy migration
+            if (await db.Database.CanConnectAsync())
+            {
+                await db.Database.MigrateAsync();
+                await DbInitializer.SeedAsync(db);
+                logger.LogInformation("Migration và Seed dữ liệu thành công.");
+                break;
+            }
+            else if (attempt == maxRetries)
+            {
+                logger.LogError("Không thể kết nối tới Database sau {MaxRetries} lần thử.", maxRetries);
+            }
         }
-        catch (Exception ex) when (attempt < maxRetries)
+        catch (Exception ex)
         {
             logger.LogWarning(ex, "Migration thất bại lần {Attempt}, thử lại sau 5 giây...", attempt);
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            if (attempt == maxRetries)
+            {
+                logger.LogError(ex, "Migration thất bại hoàn toàn sau {MaxRetries} lần thử. App vẫn sẽ cố gắng khởi động.");
+            }
+            else
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5));
+            }
         }
     }
 }
-*/
 
 if (app.Environment.IsDevelopment())
 {
