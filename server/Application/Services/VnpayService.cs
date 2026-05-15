@@ -5,6 +5,8 @@ using Datsan.Server.Application.Abstractions;
 using Datsan.Server.Core.DTOs;
 using Datsan.Server.Core.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Datsan.Server.Application.Services;
 
@@ -13,15 +15,18 @@ public class VnpayService
     private readonly IConfiguration _configuration;
     private readonly IBookingRepository _bookings;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<VnpayService> _logger;
 
     public VnpayService(
         IConfiguration configuration,
         IBookingRepository bookings,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILogger<VnpayService> logger)
     {
         _configuration = configuration;
         _bookings = bookings;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<VnpayPaymentUrlDto> CreatePaymentUrlAsync(
@@ -67,7 +72,7 @@ public class VnpayService
             ["vnp_IpAddr"] = NormalizeIp(clientIp),
             ["vnp_Locale"] = "vn",
             ["vnp_OrderInfo"] = BuildOrderInfo(booking.Id, orderInfo),
-            ["vnp_OrderType"] = "190000",
+            ["vnp_OrderType"] = "250000",
             ["vnp_ReturnUrl"] = returnUrl,
             ["vnp_TxnRef"] = txnRef
         };
@@ -81,7 +86,7 @@ public class VnpayService
         var secureHash = HmacSha512(hashSecret, rawData);
         var paymentUrl = $"{paymentBaseUrl}?{BuildEncodedQueryString(requestData)}&vnp_SecureHash={secureHash}";
         
-        Console.WriteLine($"[VNPAY] Generated URL: {paymentUrl}");
+        _logger.LogInformation("VNPAY URL: {Url}", paymentUrl);
 
         return new VnpayPaymentUrlDto
         {
@@ -233,7 +238,7 @@ public class VnpayService
         string.Join("&", data.Select(p => $"{p.Key}={p.Value}"));
 
     private static string BuildEncodedQueryString(IReadOnlyDictionary<string, string> data) =>
-        string.Join("&", data.Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
+        string.Join("&", data.Select(p => $"{WebUtility.UrlEncode(p.Key)}={WebUtility.UrlEncode(p.Value)}"));
 
     private static string HmacSha512(string key, string input)
     {
