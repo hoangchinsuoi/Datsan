@@ -53,11 +53,10 @@ public class VnpayService
             throw new InvalidOperationException("Số tiền thanh toán không hợp lệ.");
         }
 
-        // Hardcode thông tin Sandbox để đảm bảo chạy được 100%
-        var tmnCode = "Datsan01"; 
-        var hashSecret = "CHGZCSWNXWBSGTPNMYEMVYDLRDMCVHHQ";
-        var paymentBaseUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        var returnUrl = GetRequiredConfig("Vnpay:ReturnUrl");
+        var tmnCode = GetRequiredConfig("Vnpay:TmnCode").Trim();
+        var hashSecret = GetRequiredConfig("Vnpay:HashSecret").Trim();
+        var paymentBaseUrl = GetRequiredConfig("Vnpay:PaymentUrl").Trim().TrimEnd('?');
+        var returnUrl = GetRequiredConfig("Vnpay:ReturnUrl").Trim();
 
         var amount = decimal.ToInt64(decimal.Round(booking.TotalPrice * 100, 0, MidpointRounding.AwayFromZero));
         var txnRef = BuildTxnRef(booking.Id);
@@ -110,7 +109,7 @@ public class VnpayService
         IQueryCollection query,
         CancellationToken cancellationToken = default)
     {
-        var hashSecret = "CHGZCSWNXWBSGTPNMYEMVYDLRDMCVHHQ";
+        var hashSecret = GetRequiredConfig("Vnpay:HashSecret").Trim();
         var frontendReturnUrl = _configuration["Vnpay:FrontendReturnUrl"]?.Trim();
 
         var queryPairs = query
