@@ -114,7 +114,7 @@ public class BookingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ApiResponse.Fail(ex.Message, null));
+            return BadRequest(ApiResponse.Fail($"Lỗi tạo URL: {ex.Message} | Stack: {ex.StackTrace}", null));
         }
     }
 

@@ -72,7 +72,7 @@ public class VnpayService
             ["vnp_IpAddr"] = NormalizeIp(clientIp),
             ["vnp_Locale"] = "vn",
             ["vnp_OrderInfo"] = BuildOrderInfo(booking.Id, orderInfo),
-            ["vnp_OrderType"] = "250000",
+            ["vnp_OrderType"] = "200000",
             ["vnp_ReturnUrl"] = returnUrl,
             ["vnp_TxnRef"] = txnRef
         };
