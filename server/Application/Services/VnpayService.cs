@@ -235,7 +235,7 @@ public class VnpayService
         var inputBytes = Encoding.UTF8.GetBytes(input);
         using var hmac = new HMACSHA512(keyBytes);
         var hash = hmac.ComputeHash(inputBytes);
-        return Convert.ToHexString(hash).ToLowerInvariant();
+        return Convert.ToHexString(hash).ToUpperInvariant();
     }
 
     private string GetRequiredConfig(string key)
